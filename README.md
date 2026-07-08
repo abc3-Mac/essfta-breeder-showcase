@@ -61,3 +61,25 @@ volumes.
 
 - `/admin` — list all entries, create-on-behalf, preview & assemble the book.
 - Admin emails are set via `SHOWCASE_ADMIN_EMAILS` (comma-separated).
+
+## Seeding test entries
+
+The admin panel shows every row in the **active** database (the one
+`app/config.py:DB_PATH` resolves to). Entries created in a throwaway dev run
+don't exist in the deployed volume, so they won't appear there. To put a few
+realistic, fully-editable test entries into the active database:
+
+```bash
+# On the deployed NAS (writes into the live showcase_data volume):
+docker exec essfta-showcase python -m app.seed          # create if absent
+docker exec essfta-showcase python -m app.seed --force  # add another set
+docker exec essfta-showcase python -m app.seed --clear  # remove test rows
+
+# Locally:
+python -m app.seed
+```
+
+Seeded rows are tagged by a sentinel login domain (`@test.essfta.local`), so
+`--clear` removes only what the seeder created and never touches real breeder
+entries. Once seeded they appear in `/admin` and open in the normal Open/Edit
+flow like any other entry.
