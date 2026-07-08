@@ -109,6 +109,7 @@
 </head>
 <body class="theme-{{ style }}">
 
+  {% if not proof %}
   <!-- Cover -->
   <div class="page cover">
     <div class="ring">
@@ -124,6 +125,7 @@
 
   <!-- Intentional blank page after the title page (for print/binding) -->
   <div class="page blank"></div>
+  {% endif %}
 
   {% for k in kennels %}
     {% include "book/_kennel_page.html" %}

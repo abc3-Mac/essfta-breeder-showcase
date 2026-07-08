@@ -66,32 +66,31 @@ def build_book_context(request, style: str = "anniversary") -> dict:
             "embed": False, "style": _norm_style(style)}
 
 
+def _embed_photos(kennels: list):
+    for k in kennels:
+        for d in k["dogs"]:
+            d["photo1_uri"] = _photo_data_uri(d.get("photo1_path"))
+            d["photo2_uri"] = _photo_data_uri(d.get("photo2_path"))
+
+
 def render_book_html(embed: bool = True, style: str = "anniversary") -> str:
     kennels = _kennels_with_dogs()
     if embed:
-        for k in kennels:
-            for d in k["dogs"]:
-                d["photo1_uri"] = _photo_data_uri(d.get("photo1_path"))
-                d["photo2_uri"] = _photo_data_uri(d.get("photo2_path"))
+        _embed_photos(kennels)
     tmpl = _env.get_template("book/book.html")
     return tmpl.render(kennels=kennels, embed=embed, style=_norm_style(style),
                        request=None)
 
 
-def assemble_pdf(style: str = "anniversary") -> str:
-    """Render the full book to a PDF and return its path."""
-    style = _norm_style(style)
-    html = render_book_html(embed=True, style=style)
-    out_dir = config.DATA_DIR / "books"
+def _render_pdf(html: str, pdf_path) -> str:
+    """Render an HTML string to a Letter-size PDF via headless Chromium."""
+    out_dir = Path(pdf_path).parent
     out_dir.mkdir(parents=True, exist_ok=True)
-    pdf_path = out_dir / f"ESSFTA_Breeder_Showcase_{config.SHOW_YEAR}_{style}.pdf"
-
     with tempfile.NamedTemporaryFile(
         "w", suffix=".html", delete=False, dir=out_dir, encoding="utf-8"
     ) as f:
         f.write(html)
         html_path = f.name
-
     from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--no-sandbox"])
@@ -104,6 +103,32 @@ def assemble_pdf(style: str = "anniversary") -> str:
             margin={"top": "0", "bottom": "0", "left": "0", "right": "0"},
         )
         browser.close()
-
     Path(html_path).unlink(missing_ok=True)
     return str(pdf_path)
+
+
+def assemble_pdf(style: str = "anniversary") -> str:
+    """Render the full book to a PDF and return its path."""
+    style = _norm_style(style)
+    html = render_book_html(embed=True, style=style)
+    pdf_path = config.DATA_DIR / "books" / f"ESSFTA_Breeder_Showcase_{config.SHOW_YEAR}_{style}.pdf"
+    return _render_pdf(html, pdf_path)
+
+
+def assemble_kennel_pdf(kennel_id: int, style: str = "anniversary") -> str:
+    """Render just ONE kennel's page + its dog pages (no cover/blank) — the
+    breeder's personal copy for their confirmation email."""
+    style = _norm_style(style)
+    k = db.get_kennel(kennel_id)
+    if not k:
+        raise ValueError(f"kennel {kennel_id} not found")
+    dogs = db.list_dogs(kennel_id)
+    dogs.sort(key=lambda d: (d.get("call_name") or d.get("registered_name") or "").lower())
+    k["dogs"] = dogs
+    _embed_photos([k])
+    html = _env.get_template("book/book.html").render(
+        kennels=[k], embed=True, style=style, proof=True, request=None)
+    safe = "".join(c for c in (k.get("kennel_name") or f"kennel{kennel_id}")
+                   if c.isalnum() or c in " -_").strip().replace(" ", "_") or f"kennel{kennel_id}"
+    pdf_path = config.DATA_DIR / "proofs" / f"{safe}_{config.SHOW_YEAR}.pdf"
+    return _render_pdf(html, pdf_path)

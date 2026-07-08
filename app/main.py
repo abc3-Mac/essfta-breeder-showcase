@@ -210,11 +210,20 @@ async def kennel_save(request: Request, kennel_id: int):
     db.update_kennel(kennel_id, fields)
     if form.get("_action") == "submit":
         db.update_kennel(kennel_id, {"status": "submitted"})
+        k = db.get_kennel(kennel_id)
+        dogs = db.list_dogs(kennel_id)
         # Notify admins that an entry was marked complete.
         try:
-            mail.send_admin_notice(db.get_kennel(kennel_id), db.list_dogs(kennel_id))
+            mail.send_admin_notice(k, dogs)
         except Exception:  # noqa: BLE001 — never let notification break the save
             log.exception("admin notice failed")
+        # Email the breeder a PDF proof of their own pages.
+        try:
+            from .book.render import assemble_kennel_pdf
+            pdf = assemble_kennel_pdf(kennel_id, style="anniversary")
+            mail.send_entry_copy(k, dogs, pdf)
+        except Exception:  # noqa: BLE001
+            log.exception("entry-copy email failed")
     return RedirectResponse(f"/kennel/{kennel_id}", status_code=302)
 
 
