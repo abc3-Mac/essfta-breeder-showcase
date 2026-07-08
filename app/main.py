@@ -48,6 +48,17 @@ templates.env.globals.update(
 @app.on_event("startup")
 def _startup():
     db.init_db()
+    # Diagnostic: make the *active* database and its contents obvious on every
+    # boot. If the admin panel ever shows "No entries yet" unexpectedly, these
+    # two lines tell you at a glance whether you're pointed at the wrong DB
+    # file (path) or an empty one (count) — no need to shell into the container.
+    try:
+        count = len(db.list_all_kennels())
+    except Exception:  # noqa: BLE001 — never let a diagnostic break startup
+        log.exception("startup kennel count failed")
+        count = "unknown"
+    log.info("Active database: %s", config.DB_PATH)
+    log.info("Kennel entries in database: %s", count)
 
 
 # --- Session helpers ---------------------------------------------------------
