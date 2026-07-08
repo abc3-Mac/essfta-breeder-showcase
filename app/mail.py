@@ -30,6 +30,49 @@ def _send_via_mailgun(to: str, subject: str, text: str, html: str) -> bool:
         return resp.status == 200
 
 
+def send_admin_notice(kennel: dict, dogs: list) -> bool:
+    """Notify all admins when a breeder marks an entry complete."""
+    to = ", ".join(sorted(config.ADMIN_EMAILS))
+    if not to:
+        return False
+    kname = kennel.get("kennel_name") or "Untitled kennel"
+    owner = kennel.get("owner_name") or ""
+    dog_names = ", ".join(d.get("call_name") or d.get("registered_name") or "?" for d in dogs) or "none"
+    link = f"{config.BASE_URL}/kennel/{kennel['id']}"
+    subject = f"Breeder Showcase entry submitted: {kname}"
+    text = (
+        f"A breeder marked their {config.SHOW_YEAR} Breeder Showcase entry complete.\n\n"
+        f"Kennel: {kname}\nOwner: {owner}\nContact: {kennel.get('email','')} "
+        f"{kennel.get('phone','')}\nDogs ({len(dogs)}): {dog_names}\n\n"
+        f"Review/edit: {link}\n"
+    )
+    html = f"""\
+<div style="font-family:Georgia,serif;max-width:520px;margin:auto;color:#26251f">
+  <h2 style="color:#15532f">Entry submitted &middot; {kname}</h2>
+  <p>A breeder marked their {config.SHOW_YEAR} Breeder Showcase entry complete.</p>
+  <table style="font-size:14px;border-collapse:collapse">
+    <tr><td style="color:#6b6858;padding:2px 10px 2px 0">Kennel</td><td>{kname}</td></tr>
+    <tr><td style="color:#6b6858;padding:2px 10px 2px 0">Owner</td><td>{owner}</td></tr>
+    <tr><td style="color:#6b6858;padding:2px 10px 2px 0">Contact</td><td>{kennel.get('email','')} {kennel.get('phone','')}</td></tr>
+    <tr><td style="color:#6b6858;padding:2px 10px 2px 0">Dogs ({len(dogs)})</td><td>{dog_names}</td></tr>
+  </table>
+  <p style="margin:22px 0">
+    <a href="{link}" style="background:#15532f;color:#fff;padding:11px 20px;
+       border-radius:6px;text-decoration:none;font-family:Helvetica,Arial,sans-serif">
+       Review / edit this entry</a>
+  </p>
+</div>"""
+    if not config.MAILGUN_API_KEY:
+        log.warning("MAILGUN_API_KEY not set — admin notice (dev mode) for %s", kname)
+        print(f"\n[DEV] Admin notice: {kname} submitted -> {to}\n")
+        return True
+    try:
+        return _send_via_mailgun(to, subject, text, html)
+    except Exception as exc:  # noqa: BLE001
+        log.error("Mailgun admin-notice send failed: %s", exc)
+        return False
+
+
 def send_invite(to: str, link: str, inviter: str = "ESSFTA") -> bool:
     subject = f"You're invited to the ESSFTA {config.SHOW_YEAR} Breeder Showcase"
     text = (

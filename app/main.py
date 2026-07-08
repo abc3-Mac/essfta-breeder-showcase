@@ -210,6 +210,11 @@ async def kennel_save(request: Request, kennel_id: int):
     db.update_kennel(kennel_id, fields)
     if form.get("_action") == "submit":
         db.update_kennel(kennel_id, {"status": "submitted"})
+        # Notify admins that an entry was marked complete.
+        try:
+            mail.send_admin_notice(db.get_kennel(kennel_id), db.list_dogs(kennel_id))
+        except Exception:  # noqa: BLE001 — never let notification break the save
+            log.exception("admin notice failed")
     return RedirectResponse(f"/kennel/{kennel_id}", status_code=302)
 
 
