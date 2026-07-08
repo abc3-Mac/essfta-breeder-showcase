@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card" style="max-width:480px;margin:8vh auto 0;">
+  <h2>Sign in</h2>
+  <p class="hint">Enter your email and we'll send you a secure sign-in link — no password to remember.</p>
+
+  {% if error %}<div class="flash err">{{ error }}</div>{% endif %}
+
+  {% if sent %}
+    <div class="flash">
+      Check <strong>{{ email }}</strong> for your sign-in link. It's good for 60 minutes.
+    </div>
+    <p class="hint">Didn't get it? Check spam, or <a href="/">try again</a>.</p>
+  {% else %}
+    <form method="post" action="/login">
+      <label for="email">Email address</label>
+      <input type="email" id="email" name="email" required autofocus
+             placeholder="you@example.com">
+      <div class="actions">
+        <button class="btn" type="submit">Send my sign-in link</button>
+      </div>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+  <h2>Admin — all entries ({{ SHOW_YEAR }})</h2>
+  <p class="hint">{{ kennels|length }} kennel{{ "" if kennels|length == 1 else "s" }}. Book is assembled alphabetically by kennel name, each kennel followed by its dogs. Choose an export style:</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="repeat-row" style="background:#fff">
+      <strong>Anniversary</strong>
+      <p class="hint" style="margin:4px 0 10px">100th-anniversary redesign — green &amp; gold, sans-serif.</p>
+      <div class="actions" style="margin:0">
+        <a class="btn ghost small" href="/admin/book/preview?style=anniversary" target="_blank">Preview</a>
+        <form method="post" action="/admin/book/assemble">
+          <input type="hidden" name="style" value="anniversary">
+          <button class="btn gold small" type="submit">Assemble PDF</button>
+        </form>
+      </div>
+    </div>
+    <div class="repeat-row" style="background:#fff">
+      <strong>Classic</strong>
+      <p class="hint" style="margin:4px 0 10px">Matches the 2024 template — serif, maroon/green labels.</p>
+      <div class="actions" style="margin:0">
+        <a class="btn ghost small" href="/admin/book/preview?style=classic" target="_blank">Preview</a>
+        <form method="post" action="/admin/book/assemble">
+          <input type="hidden" name="style" value="classic">
+          <button class="btn small" type="submit">Assemble PDF</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Invite a breeder</h2>
+  {% if invited %}<div class="flash">Invitation sent to <strong>{{ invited }}</strong>.</div>{% endif %}
+  <p class="hint">Email an owner a one-click sign-in link. They fill in their own kennel + dogs; it's tied to their email so they can return anytime.</p>
+  <form method="post" action="/admin/invite">
+    <label>Owner's email</label>
+    <div class="row">
+      <div class="col"><input type="email" name="owner_email" required placeholder="owner@example.com"></div>
+      <div class="col" style="flex:0 0 auto"><button class="btn gold" type="submit" style="margin-top:6px">Send invitation</button></div>
+    </div>
+  </form>
+  <p class="hint" style="margin-top:16px">Owner isn't computer-savvy? Create the entry yourself and fill it in for them:</p>
+  <form method="post" action="/admin/kennel/new">
+    <div class="row">
+      <div class="col"><input type="email" name="login_email" required placeholder="owner@example.com"></div>
+      <div class="col" style="flex:0 0 auto"><button class="btn ghost" type="submit" style="margin-top:6px">Create &amp; fill in myself</button></div>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Entries</h2>
+  <ul class="klist">
+    {% for k in kennels %}
+      <li>
+        <div>
+          <strong>{{ k.kennel_name or "Untitled kennel" }}</strong>
+          <span class="pill {{ k.status }}">{{ k.status }}</span>
+          <div class="meta">
+            {{ k.owner_name }} · {{ k.login_email }} ·
+            {{ k.dogs|length }} dog{{ "" if k.dogs|length == 1 else "s" }}
+            {% if k.dogs %}({{ k.dogs|map(attribute='call_name')|select|join(', ') }}){% endif %}
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <a class="btn small" href="/kennel/{{ k.id }}">Open / Edit</a>
+          <form method="post" action="/kennel/{{ k.id }}/delete"
+                onsubmit="return confirm('Delete {{ k.kennel_name|default('this kennel') }} and its dogs only? Other entries are untouched.')">
+            <button class="btn small danger" type="submit">Delete</button>
+          </form>
+        </div>
+      </li>
+    {% else %}
+      <li><span class="meta">No entries yet.</span></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

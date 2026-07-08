@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <h2>Kennel information</h2>
+    <span class="pill {{ k.status }}">{{ k.status }}</span>
+  </div>
+  <p class="hint">Fill this out as you'd like it to appear in the booklet. You can save and come back anytime.</p>
+
+  <form method="post" action="/kennel/{{ k.id }}" id="kennelForm">
+    <div class="row">
+      <div class="col">
+        <label for="kennel_name">Kennel name</label>
+        <input type="text" id="kennel_name" name="kennel_name" value="{{ k.kennel_name }}">
+      </div>
+      <div class="col">
+        <label>Owner's name</label>
+        <input type="text" name="owner_name" value="{{ k.owner_name }}">
+      </div>
+    </div>
+
+    <label>Location / address</label>
+    <input type="text" name="location_address" value="{{ k.location_address }}">
+
+    <div class="row">
+      <div class="col">
+        <label>Email</label>
+        <input type="text" name="email" value="{{ k.email }}">
+      </div>
+      <div class="col">
+        <label>Phone</label>
+        <input type="text" name="phone" value="{{ k.phone }}">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Social media / Facebook profile</label>
+        <input type="text" name="social_media" value="{{ k.social_media }}">
+      </div>
+      <div class="col">
+        <label>Year started in English Springer Spaniels</label>
+        <input type="text" name="year_started" value="{{ k.year_started }}">
+      </div>
+    </div>
+
+    <label>Breeding philosophy</label>
+    <textarea name="breeding_philosophy">{{ k.breeding_philosophy }}</textarea>
+
+    <label>Mentors (up to {{ MAX_MENTORS }})</label>
+    {% for i in range(MAX_MENTORS) %}
+      <input type="text" name="mentor_{{ i }}" style="margin-bottom:6px"
+             value="{{ k.mentors_json[i] if k.mentors_json|length > i else '' }}">
+    {% endfor %}
+
+    <label>Kennel names most prominent in your pedigrees (up to {{ MAX_PROMINENT }})</label>
+    {% for i in range(MAX_PROMINENT) %}
+      <input type="text" name="prominent_{{ i }}" style="margin-bottom:6px"
+             value="{{ k.prominent_json[i] if k.prominent_json|length > i else '' }}">
+    {% endfor %}
+
+    <label>Health clearance testing on our breeding stock</label>
+    <div class="checks">
+      {% for t in HEALTH_TESTS %}
+        <label><input type="checkbox" name="health_{{ t }}" {{ 'checked' if k.health_json.get(t) }}> {{ t }}</label>
+      {% endfor %}
+    </div>
+
+    <label>Venues your dogs participate in</label>
+    <div class="checks">
+      {% for v in VENUES %}
+        <label><input type="checkbox" name="venues" value="{{ v }}" {{ 'checked' if v in k.venues_json }}> {{ v }}</label>
+      {% endfor %}
+    </div>
+
+    <div class="section-title">Our Dogs</div>
+    <div class="section-sub">Registered name with titles · career highlights (up to {{ MAX_OUR_DOGS }})</div>
+    {% for i in range(MAX_OUR_DOGS) %}
+      {% set od = k.our_dogs_json[i] if k.our_dogs_json|length > i else {} %}
+      <div class="repeat-row">
+        <input type="text" name="ourdog_name_{{ i }}" placeholder="Registered name with titles"
+               value="{{ od.get('name','') }}" style="margin-bottom:6px">
+        <textarea name="ourdog_hl_{{ i }}" placeholder="Career highlights">{{ od.get('highlights','') }}</textarea>
+      </div>
+    {% endfor %}
+
+    <div class="section-title">At Stud</div>
+    <div class="section-sub">Registered name with titles · date of birth · health clearances/certification numbers (up to {{ MAX_AT_STUD }})</div>
+    {% for i in range(MAX_AT_STUD) %}
+      {% set st = k.at_stud_json[i] if k.at_stud_json|length > i else {} %}
+      <div class="repeat-row">
+        <div class="row">
+          <div class="col"><input type="text" name="stud_name_{{ i }}" placeholder="Registered name with titles" value="{{ st.get('name','') }}"></div>
+          <div class="col" style="flex:0 1 160px"><input type="text" name="stud_dob_{{ i }}" placeholder="Date of birth" value="{{ st.get('dob','') }}"></div>
+        </div>
+        <input type="text" name="stud_certs_{{ i }}" placeholder="Health clearances / certification numbers" value="{{ st.get('certs','') }}" style="margin-top:6px">
+      </div>
+    {% endfor %}
+
+    <div class="section-title">Planned Breedings</div>
+    <div class="section-sub">Sire &amp; dam registered name with titles · estimated date of whelp (up to {{ MAX_PLANNED }})</div>
+    {% for i in range(MAX_PLANNED) %}
+      {% set pb = k.planned_json[i] if k.planned_json|length > i else {} %}
+      <div class="repeat-row">
+        <input type="text" name="planned_sd_{{ i }}" placeholder="Sire &times; Dam (registered names with titles)" value="{{ pb.get('sire_dam','') }}" style="margin-bottom:6px">
+        <input type="text" name="planned_whelp_{{ i }}" placeholder="Estimated date of whelp" value="{{ pb.get('whelp','') }}">
+      </div>
+    {% endfor %}
+
+    <div class="actions">
+      <button class="btn" type="submit" name="_action" value="save">Save</button>
+      <button class="btn gold" type="submit" name="_action" value="submit">Save &amp; mark complete</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Dogs ({{ dogs|length }}/{{ MAX_DOGS }})</h2>
+  <p class="hint">Each dog gets its own page with two photos.</p>
+  {% for d in dogs %}
+    <span class="dog-chip">
+      <strong>{{ d.call_name or d.registered_name or "Untitled dog" }}</strong>
+      <a class="btn small ghost" href="/dog/{{ d.id }}">Edit</a>
+    </span>
+  {% endfor %}
+  {% if dogs|length < MAX_DOGS %}
+    <form method="post" action="/kennel/{{ k.id }}/dog/new" style="margin-top:14px">
+      <button class="btn gold" type="submit">+ Add a dog</button>
+    </form>
+  {% else %}
+    <p class="hint" style="margin-top:14px">You've reached the {{ MAX_DOGS }}-dog limit.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <form method="post" action="/kennel/{{ k.id }}/delete"
+        onsubmit="return confirm('Delete this entire kennel entry and its dogs? This cannot be undone.')">
+    <button class="btn danger small" type="submit">Delete this kennel entry</button>
+  </form>
+</div>
+{% endblock %}

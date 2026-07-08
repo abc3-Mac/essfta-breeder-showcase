@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ESSFTA Breeder Showcase {{ SHOW_YEAR }}</title>
+<style>
+  /* ---- Anniversary (modern) theme = defaults ---- */
+  :root{
+    --green-dark:#0d3b23; --green:#15532f; --green-soft:#2a6b45;
+    --gold:#c8a53a; --gold-dark:#a8862a; --cream:#f6f1e2;
+    --ink:#26251f; --line:#c9c2ab; --muted:#6b6858;
+    /* themeable tokens */
+    --font:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --label:var(--green); --band-c:var(--green-dark); --divider:var(--gold);
+    --kn-c:var(--green-dark); --lbl-c:var(--gold-dark); --chk-on:var(--green);
+    --foot-c:var(--gold-dark); --radius:4px; --frame-bg:var(--cream);
+    --ped-bg:#eef1e6;
+  }
+  /* ---- Classic theme = matches the 2024 InDesign template ---- */
+  body.theme-classic{
+    --font:Georgia,"Times New Roman",serif;
+    --divider:#b9b3a0; --kn-c:#1f1f1f; --foot-c:#9a9a90;
+    --radius:2px; --frame-bg:#f3f1ea; --ped-bg:#dfe4cf;
+  }
+  /* classic uses page-type label colors: kennel=maroon, dog=green */
+  body.theme-classic .sheet-kennel{ --label:#8a2a2a; --band-c:#8a2a2a; --lbl-c:#8a2a2a; --chk-on:#4a4a44; }
+  body.theme-classic .sheet-dog{ --label:#3f6f34; --band-c:#3f6f34; --lbl-c:#3f6f34; --chk-on:#3f6f34; }
+
+  @page { size: Letter; margin: 0; }
+  * { box-sizing: border-box; }
+  html,body { margin:0; padding:0; color:var(--ink); font-family:var(--font); }
+  .page {
+    position: relative;
+    width: 8.5in; height: 11in;
+    padding: 0.55in 0.6in;
+    page-break-after: always;
+    overflow: hidden;
+    background: #fff;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* Cover (anniversary) */
+  .cover { background: var(--green-dark); color: var(--cream);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:1in; }
+  .cover .ring { border:4px solid var(--gold); border-radius:999px;
+    width:2.4in; height:2.4in; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; margin-bottom:0.5in; }
+  .cover .ring .yrs { font-size:34px; font-weight:800; color:var(--gold); }
+  .cover .ring .anniv { font-size:13px; letter-spacing:.18em; color:var(--cream); }
+  .cover h1 { font-size:40px; margin:0.1in 0 0; letter-spacing:.02em; }
+  .cover .tag { font-size:16px; color:var(--gold); letter-spacing:.14em;
+    text-transform:uppercase; margin-top:0.15in; }
+  .cover .years { margin-top:0.28in; font-size:14px; color:var(--cream); line-height:1.5; }
+  .cover .theme { margin-top:0.35in; font-size:26px; font-style:italic;
+    color:var(--gold); font-weight:700; }
+  /* Cover (classic) — clean white, serif */
+  body.theme-classic .cover { background:#fff; color:#1f1f1f; }
+  body.theme-classic .cover .ring { border-color:#8a2a2a; }
+  body.theme-classic .cover .ring .yrs { color:#8a2a2a; }
+  body.theme-classic .cover .ring .anniv { color:#3f6f34; }
+  body.theme-classic .cover .tag { color:#3f6f34; }
+  body.theme-classic .cover .years { color:#555; }
+  body.theme-classic .cover .theme { color:#8a2a2a; }
+
+  /* Shared page header */
+  .sheet-head { text-align:center; border-bottom:2px solid var(--divider); padding-bottom:6px; margin-bottom:12px; }
+  .sheet-head .kn { font-size:22px; font-weight:800; color:var(--kn-c); letter-spacing:.02em; }
+  .sheet-head .lbl { font-size:10px; letter-spacing:.16em; color:var(--lbl-c); text-transform:uppercase; }
+
+  /* Field grid */
+  .field { margin-bottom:8px; }
+  .field .cap { font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--label); text-align:center; font-weight:700; }
+  .field .val { border:1px solid var(--line); border-radius:var(--radius); padding:6px 9px;
+    min-height:16px; font-size:12.5px; background:#fff; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+
+  .band { text-align:center; color:var(--band-c); font-weight:800;
+    text-transform:uppercase; letter-spacing:.05em; font-size:14px;
+    margin:12px 0 3px; }
+  .band-sub { text-align:center; color:var(--muted); font-size:9px;
+    text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+
+  .chk-line { font-size:11.5px; line-height:1.8; }
+  .chk { color:var(--chk-on); font-weight:700; }
+  .chk-off { color:#bbb; }
+
+  .stack .val { margin-bottom:6px; }
+  .career { font-size:11px; color:var(--muted); margin-top:2px; }
+
+  /* Dog page */
+  .photos { display:grid; grid-template-columns:1fr 1.35fr; gap:12px; margin:10px 0; }
+  .photos .frame { border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+    background:var(--frame-bg); display:flex; align-items:center; justify-content:center;
+    height:2.7in; }
+  .photos .frame img { width:100%; height:100%; object-fit:cover; }
+  .ped-health { display:grid; grid-template-columns:1.5fr 1fr; gap:12px; }
+  .ped { background:var(--ped-bg); border:1px solid var(--line); border-radius:var(--radius); padding:10px; }
+  .ped .node { font-size:10.5px; padding:3px 6px; margin:3px 0; background:#fff;
+    border:1px solid var(--line); border-radius:var(--radius); }
+  .ped .gen2 { margin-left:18px; }
+  .health-tbl .val { display:flex; justify-content:space-between; gap:8px; }
+  .health-tbl .hk { color:var(--muted); font-size:10px; text-transform:uppercase; }
+  .foot { position:absolute; bottom:0.3in; left:0; right:0; text-align:center;
+    font-size:8px; color:var(--foot-c); letter-spacing:.12em; }
+</style>
+</head>
+<body class="theme-{{ style }}">
+
+  <!-- Cover -->
+  <div class="page cover">
+    <div class="ring">
+      <div class="yrs">100</div>
+      <div class="anniv">YEARS</div>
+    </div>
+    <h1>Breeder Showcase</h1>
+    <div class="tag">English Springer Spaniel Field Trial Association</div>
+    <div class="years">1926 &ndash; 2026 &middot; 100th Anniversary</div>
+    <div class="theme">&ldquo;Paw-cific Northwest!&rdquo;</div>
+    <div class="years">{{ SHOW_YEAR }} National Specialty &middot; October 10&ndash;17, {{ SHOW_YEAR }}<br>Linn County Expo Center &middot; Albany, Oregon</div>
+  </div>
+
+  {% for k in kennels %}
+    {% include "book/_kennel_page.html" %}
+    {% for d in k.dogs %}
+      {% include "book/_dog_page.html" %}
+    {% endfor %}
+  {% endfor %}
+
+<script>
+// Guarantee one physical page per entry: if an entry's content would exceed
+// the sheet, scale it down just enough to fit (never spills to page 2, never
+// clips). Footer stays pinned. Runs before Playwright captures the PDF.
+document.querySelectorAll('.page:not(.cover)').forEach(function(page){
+  var foot = page.querySelector('.foot');
+  var wrap = document.createElement('div');
+  Array.prototype.slice.call(page.children).forEach(function(c){
+    if (c !== foot) wrap.appendChild(c);
+  });
+  page.insertBefore(wrap, foot || null);
+  var cs = getComputedStyle(page);
+  var avail = page.clientHeight
+    - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
+    - (foot ? foot.offsetHeight + 12 : 0);
+  if (wrap.scrollHeight > avail) {
+    var scale = Math.max(0.6, avail / wrap.scrollHeight);
+    wrap.style.transformOrigin = 'top left';
+    wrap.style.width = (100 / scale) + '%';
+    wrap.style.transform = 'scale(' + scale.toFixed(4) + ')';
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+  <h2>My kennel entries</h2>
+  <p class="hint">Signed in as {{ user.email }}. Create your kennel page, then add up to {{ MAX_DOGS }} dogs.</p>
+
+  {% if kennels %}
+    <ul class="klist">
+      {% for k in kennels %}
+        <li>
+          <div>
+            <strong>{{ k.kennel_name or "Untitled kennel" }}</strong>
+            <span class="pill {{ k.status }}">{{ k.status }}</span>
+            <div class="meta">{{ k.dog_count }} dog{{ "" if k.dog_count == 1 else "s" }}</div>
+          </div>
+          <a class="btn small" href="/kennel/{{ k.id }}">Edit</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="hint">You haven't started an entry yet.</p>
+  {% endif %}
+
+  <form method="post" action="/kennel/new">
+    <div class="actions">
+      <button class="btn gold" type="submit">+ Start a kennel entry</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

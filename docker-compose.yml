@@ -1,0 +1,31 @@
+services:
+  showcase:
+    build: .
+    image: essfta-breeder-showcase:latest
+    container_name: essfta-showcase
+    restart: unless-stopped
+    environment:
+      SHOWCASE_SECRET_KEY: "${SHOWCASE_SECRET_KEY}"
+      SHOWCASE_BASE_URL: "https://essfta-showcase.collver.biz"
+      SHOWCASE_ADMIN_EMAILS: "${SHOWCASE_ADMIN_EMAILS:-collverab3@gmail.com}"
+      SHOWCASE_YEAR: "2026"
+      # Mailgun (magic-link email). Leave blank until the key is provided —
+      # the app runs fine and logs links to the container log in the meantime.
+      MAILGUN_DOMAIN: "${MAILGUN_DOMAIN:-mg.collver.biz}"
+      MAILGUN_API_KEY: "${MAILGUN_API_KEY:-}"
+      SHOWCASE_MAIL_FROM: "${SHOWCASE_MAIL_FROM:-ESSFTA Breeder Showcase <showcase@mg.collver.biz>}"
+    volumes:
+      - showcase_data:/data
+      - showcase_uploads:/uploads
+    networks:
+      - npm_npm_network
+    ports:
+      - "8790:8790"   # direct access over Tailscale for testing before NPM route
+
+volumes:
+  showcase_data:
+  showcase_uploads:
+
+networks:
+  npm_npm_network:
+    external: true

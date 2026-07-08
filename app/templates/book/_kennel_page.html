@@ -1,0 +1,76 @@
+<div class="page sheet-kennel">
+  <div class="sheet-head">
+    <div class="lbl">Kennel</div>
+    <div class="kn">{{ k.kennel_name }}</div>
+  </div>
+
+  <div class="grid2">
+    <div class="field"><div class="cap">Owner's Name</div><div class="val">{{ k.owner_name }}</div></div>
+    <div class="field"><div class="cap">Year Started in ESS</div><div class="val">{{ k.year_started }}</div></div>
+  </div>
+  <div class="field"><div class="cap">Location / Address</div><div class="val">{{ k.location_address }}</div></div>
+  <div class="grid3">
+    <div class="field"><div class="cap">Email</div><div class="val">{{ k.email }}</div></div>
+    <div class="field"><div class="cap">Phone</div><div class="val">{{ k.phone }}</div></div>
+    <div class="field"><div class="cap">Social / Facebook</div><div class="val">{{ k.social_media }}</div></div>
+  </div>
+
+  <div class="field"><div class="cap">Breeding Philosophy</div><div class="val" style="min-height:38px">{{ k.breeding_philosophy }}</div></div>
+
+  <div class="grid2">
+    <div class="field"><div class="cap">Mentors</div><div class="val">{{ k.mentors_json | join(", ") }}</div></div>
+    <div class="field"><div class="cap">Prominent Kennels in Pedigree</div><div class="val">{{ k.prominent_json | join(", ") }}</div></div>
+  </div>
+
+  <div class="field">
+    <div class="cap">Health Clearance Testing on Breeding Stock</div>
+    <div class="val chk-line" style="text-align:center">
+      {% for t in HEALTH_TESTS %}
+        <span class="{{ 'chk' if k.health_json.get(t) else 'chk-off' }}">
+          {{ "✔" if k.health_json.get(t) else "○" }} {{ t }}</span>{% if not loop.last %} &nbsp; {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="cap">Venues Our Dogs Participate</div>
+    <div class="val chk-line" style="text-align:center">
+      {% for v in VENUES %}
+        <span class="{{ 'chk' if v in k.venues_json else 'chk-off' }}">
+          {{ "✔" if v in k.venues_json else "○" }} {{ v }}</span>{% if not loop.last %} &nbsp; {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if k.our_dogs_json %}
+  <div class="band">Our Dogs</div>
+  <div class="band-sub">Registered name with titles &middot; career highlights</div>
+  <div class="stack">
+    {% for od in k.our_dogs_json %}
+      <div class="val"><strong>{{ od.name }}</strong>{% if od.highlights %}<div class="career">{{ od.highlights }}</div>{% endif %}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if k.at_stud_json %}
+  <div class="band">At Stud</div>
+  <div class="band-sub">Registered name with titles &middot; date of birth &middot; certification numbers</div>
+  <div class="stack">
+    {% for st in k.at_stud_json %}
+      <div class="val"><strong>{{ st.name }}</strong>{% if st.dob %} &mdash; {{ st.dob }}{% endif %}{% if st.certs %}<div class="career">{{ st.certs }}</div>{% endif %}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if k.planned_json %}
+  <div class="band">Planned Breedings</div>
+  <div class="band-sub">Sire &amp; dam registered name with titles &middot; estimated date of whelp</div>
+  <div class="stack">
+    {% for pb in k.planned_json %}
+      <div class="val"><strong>{{ pb.sire_dam }}</strong>{% if pb.whelp %} &mdash; {{ pb.whelp }}{% endif %}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="foot">ESSFTA BREEDER SHOWCASE &middot; 100 YEARS &middot; 1926&ndash;2026</div>
+</div>

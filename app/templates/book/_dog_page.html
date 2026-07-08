@@ -1,0 +1,60 @@
+<div class="page sheet-dog">
+  <div class="sheet-head">
+    <div class="lbl">Dog's Registered Name with Titles</div>
+    <div class="kn" style="font-size:19px">{{ d.registered_name }}</div>
+  </div>
+
+  <div class="field"><div class="cap">Breeder's Name(s)</div><div class="val">{{ d.breeders }}</div></div>
+  <div class="grid2">
+    <div class="field"><div class="cap">Primary Owner's Name</div><div class="val">{{ d.owner_name }}</div></div>
+    <div class="field"><div class="cap">Primary Owner's Location</div><div class="val">{{ d.owner_address }}</div></div>
+  </div>
+  <div class="grid3">
+    <div class="field"><div class="cap">Call Name</div><div class="val">{{ d.call_name }}</div></div>
+    <div class="field"><div class="cap">Email</div><div class="val">{{ d.owner_email }}</div></div>
+    <div class="field"><div class="cap">Phone</div><div class="val">{{ d.owner_phone }}</div></div>
+  </div>
+
+  {% set p1 = d.photo1_uri if embed else ("/photo/" ~ d.photo1_path if d.photo1_path else "") %}
+  {% set p2 = d.photo2_uri if embed else ("/photo/" ~ d.photo2_path if d.photo2_path else "") %}
+  <div class="photos">
+    <div class="frame">{% if p1 %}<img src="{{ p1 }}" alt="">{% endif %}</div>
+    <div class="frame">{% if p2 %}<img src="{{ p2 }}" alt="">{% endif %}</div>
+  </div>
+
+  <div class="ped-health">
+    <div>
+      <div class="cap" style="text-align:left;margin-bottom:4px">Pedigree</div>
+      <div class="ped">
+        <div class="node"><strong>{{ d.registered_name }}</strong></div>
+        <div class="node gen2">{{ d.pedigree_json.get('sire','') }}</div>
+        <div class="node gen2">{{ d.pedigree_json.get('sire_sire','') }}</div>
+        <div class="node gen2">{{ d.pedigree_json.get('sire_dam','') }}</div>
+        <div class="node gen2">{{ d.pedigree_json.get('dam','') }}</div>
+        <div class="node gen2">{{ d.pedigree_json.get('dam_sire','') }}</div>
+        <div class="node gen2">{{ d.pedigree_json.get('dam_dam','') }}</div>
+      </div>
+    </div>
+    <div>
+      <div class="grid2" style="grid-template-columns:1fr 1fr">
+        <div class="field"><div class="cap">Date of Birth</div><div class="val">{{ d.dob }}</div></div>
+        <div class="field"><div class="cap">Color</div><div class="val">{{ d.color }}</div></div>
+      </div>
+      <div class="cap" style="margin:4px 0">Health Clearances</div>
+      <div class="health-tbl">
+        {% for key, label in DOG_HEALTH_FIELDS %}
+          <div class="val"><span class="hk">{{ label }}</span><span>{{ d.health_json.get(key,'') }}</span></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="band">Show / Performance Career Highlights</div>
+  <div class="val">{{ d.career_highlights }}</div>
+  <div class="band">Best Virtues</div>
+  <div class="val">{{ d.best_virtues }}</div>
+  {% if d.wish_list %}<div class="band">Wish List of Virtues</div><div class="val">{{ d.wish_list }}</div>{% endif %}
+  {% if d.has_produced %}<div class="band">Has Produced</div><div class="val">{{ d.has_produced }}</div>{% endif %}
+
+  <div class="foot">{{ k.kennel_name }} &middot; ESSFTA BREEDER SHOWCASE &middot; 1926&ndash;2026</div>
+</div>

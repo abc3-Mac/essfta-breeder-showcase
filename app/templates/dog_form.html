@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+  <a href="/kennel/{{ k.id }}" class="hint" style="text-decoration:none">&larr; Back to {{ k.kennel_name or "kennel" }}</a>
+  <h2 style="margin-top:8px">Dog page</h2>
+  <p class="hint">This becomes one page in the booklet.</p>
+
+  <form method="post" action="/dog/{{ d.id }}">
+    <label>Dog's registered name with titles</label>
+    <input type="text" name="registered_name" value="{{ d.registered_name }}">
+
+    <label>Breeder's name(s)</label>
+    <input type="text" name="breeders" value="{{ d.breeders }}">
+
+    <div class="row">
+      <div class="col">
+        <label>Primary owner's name</label>
+        <input type="text" name="owner_name" value="{{ d.owner_name }}">
+      </div>
+      <div class="col">
+        <label>Primary owner's location / address</label>
+        <input type="text" name="owner_address" value="{{ d.owner_address }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <label>Primary owner's email</label>
+        <input type="text" name="owner_email" value="{{ d.owner_email }}">
+      </div>
+      <div class="col">
+        <label>Primary owner's phone</label>
+        <input type="text" name="owner_phone" value="{{ d.owner_phone }}">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col" style="flex:0 1 220px">
+        <label>Dog's call name</label>
+        <input type="text" name="call_name" value="{{ d.call_name }}">
+      </div>
+      <div class="col">
+        <label>Date of birth</label>
+        <input type="text" name="dob" value="{{ d.dob }}" placeholder="MM/DD/YYYY">
+      </div>
+      <div class="col">
+        <label>Color</label>
+        <input type="text" name="color" value="{{ d.color }}">
+      </div>
+    </div>
+
+    <div class="section-title">Pedigree (3 generations)</div>
+    <div class="section-sub">Sire &amp; dam and the four grandparents</div>
+    <div class="row">
+      {% for key, label in PEDIGREE_SLOTS %}
+        <div class="col" style="flex:1 1 240px">
+          <label>{{ label }}</label>
+          <input type="text" name="ped_{{ key }}" value="{{ d.pedigree_json.get(key,'') }}">
+        </div>
+      {% endfor %}
+    </div>
+
+    <label>Health clearances</label>
+    <div class="row">
+      {% for key, label in DOG_HEALTH_FIELDS %}
+        <div class="col" style="flex:1 1 150px">
+          <label style="font-weight:500;text-transform:none;color:var(--muted)">{{ label }}</label>
+          <input type="text" name="health_{{ key }}" value="{{ d.health_json.get(key,'') }}">
+        </div>
+      {% endfor %}
+    </div>
+
+    <label>Show / performance career highlights</label>
+    <textarea name="career_highlights">{{ d.career_highlights }}</textarea>
+
+    <label>Best virtues</label>
+    <textarea name="best_virtues">{{ d.best_virtues }}</textarea>
+
+    <label>Wish list of virtues</label>
+    <textarea name="wish_list">{{ d.wish_list }}</textarea>
+
+    <label>Has produced</label>
+    <textarea name="has_produced">{{ d.has_produced }}</textarea>
+
+    <div class="actions">
+      <button class="btn" type="submit">Save dog</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Photos</h2>
+  <p class="hint">Two photos per dog. A portrait/headshot and an action or stacked shot work well. Big phone photos are automatically shrunk before upload.</p>
+  <div class="photo-slots">
+    {% for slot in [1, 2] %}
+      {% set path = d['photo' ~ slot ~ '_path'] %}
+      <div class="photo-tile">
+        <div class="meta" style="margin-bottom:8px">Photo {{ slot }}{{ " (portrait/headshot)" if slot == 1 else " (action/stack)" }}</div>
+        {% if path %}
+          <img src="/photo/{{ path }}" alt="Photo {{ slot }}">
+          <form method="post" action="/dog/{{ d.id }}/photo/{{ slot }}/delete" style="margin-top:8px">
+            <button class="btn small danger" type="submit">Remove</button>
+          </form>
+        {% else %}
+          <p class="meta">No photo yet.</p>
+        {% endif %}
+        <form method="post" action="/dog/{{ d.id }}/photo/{{ slot }}"
+              enctype="multipart/form-data" class="photo-upload" style="margin-top:10px">
+          <input type="file" name="photo" accept="image/*" required>
+          <button class="btn small gold" type="submit" style="margin-top:8px">Upload</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <form method="post" action="/dog/{{ d.id }}/delete"
+        onsubmit="return confirm('Delete this dog page?')">
+    <button class="btn danger small" type="submit">Delete this dog</button>
+  </form>
+</div>
+
+<script>
+// Client-side downscale: shrink large images to <=2000px before upload so
+// phone photos don't take forever on slow show-hall wifi.
+document.querySelectorAll('.photo-upload').forEach(function(form){
+  var input = form.querySelector('input[type=file]');
+  form.addEventListener('submit', function(e){
+    var file = input.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size < 1200000) return; // small enough already
+    e.preventDefault();
+    var img = new Image();
+    img.onload = function(){
+      var max = 2000, scale = Math.min(1, max / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(function(blob){
+        var dt = new DataTransfer();
+        dt.items.add(new File([blob], 'photo.jpg', {type:'image/jpeg'}));
+        input.files = dt.files;
+        form.submit();
+      }, 'image/jpeg', 0.88);
+    };
+    img.src = URL.createObjectURL(file);
+  });
+});
+</script>
+{% endblock %}
