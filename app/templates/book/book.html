@@ -122,6 +122,9 @@
     <div class="years">{{ SHOW_YEAR }} National Specialty &middot; October 10&ndash;17, {{ SHOW_YEAR }}<br>Linn County Expo Center &middot; Albany, Oregon</div>
   </div>
 
+  <!-- Intentional blank page after the title page (for print/binding) -->
+  <div class="page blank"></div>
+
   {% for k in kennels %}
     {% include "book/_kennel_page.html" %}
     {% for d in k.dogs %}
@@ -133,7 +136,7 @@
 // Guarantee one physical page per entry: if an entry's content would exceed
 // the sheet, scale it down just enough to fit (never spills to page 2, never
 // clips). Footer stays pinned. Runs before Playwright captures the PDF.
-document.querySelectorAll('.page:not(.cover)').forEach(function(page){
+document.querySelectorAll('.page:not(.cover):not(.blank)').forEach(function(page){
   var foot = page.querySelector('.foot');
   var wrap = document.createElement('div');
   Array.prototype.slice.call(page.children).forEach(function(c){
