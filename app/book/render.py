@@ -53,6 +53,31 @@ def _photo_data_uri(fname: str) -> str:
     return f"data:image/jpeg;base64,{b64}"
 
 
+_FONT_CACHE = None
+
+
+def font_face_css() -> str:
+    """@font-face rules with the booklet fonts embedded as data URIs, so the
+    PDF renders identically on any machine (local Mac and Linux container)."""
+    global _FONT_CACHE
+    if _FONT_CACHE is not None:
+        return _FONT_CACHE
+    faces = []
+    for family, fname in (("ESSSans", "SourceSans3.ttf"),
+                          ("ESSSerif", "SourceSerif4.ttf")):
+        p = BASE / "static" / "fonts" / fname
+        if not p.exists():
+            continue
+        b64 = base64.b64encode(p.read_bytes()).decode()
+        faces.append(
+            f'@font-face{{font-family:"{family}";'
+            f'src:url(data:font/ttf;base64,{b64}) format("truetype");'
+            f'font-weight:200 900;font-style:normal;font-display:swap;}}'
+        )
+    _FONT_CACHE = "\n".join(faces)
+    return _FONT_CACHE
+
+
 STYLES = {"classic", "anniversary"}
 
 
@@ -63,7 +88,8 @@ def _norm_style(style: str) -> str:
 def build_book_context(request, style: str = "anniversary") -> dict:
     """Context for the on-screen (network-served) HTML preview."""
     return {"request": request, "kennels": _kennels_with_dogs(),
-            "embed": False, "style": _norm_style(style)}
+            "embed": False, "style": _norm_style(style),
+            "font_faces": font_face_css()}
 
 
 def _embed_photos(kennels: list):
@@ -79,7 +105,7 @@ def render_book_html(embed: bool = True, style: str = "anniversary") -> str:
         _embed_photos(kennels)
     tmpl = _env.get_template("book/book.html")
     return tmpl.render(kennels=kennels, embed=embed, style=_norm_style(style),
-                       request=None)
+                       font_faces=font_face_css(), request=None)
 
 
 def _render_pdf(html: str, pdf_path) -> str:
@@ -96,6 +122,13 @@ def _render_pdf(html: str, pdf_path) -> str:
         browser = p.chromium.launch(args=["--no-sandbox"])
         page = browser.new_page()
         page.goto("file://" + html_path, wait_until="load")
+        # Ensure embedded fonts are loaded (and the fit-to-page script has run)
+        # before capturing, so measurements use real metrics.
+        try:
+            page.evaluate("async () => { await document.fonts.ready; }")
+        except Exception:  # noqa: BLE001
+            pass
+        page.wait_for_timeout(150)
         page.pdf(
             path=str(pdf_path),
             format="Letter",
@@ -127,7 +160,8 @@ def assemble_kennel_pdf(kennel_id: int, style: str = "anniversary") -> str:
     k["dogs"] = dogs
     _embed_photos([k])
     html = _env.get_template("book/book.html").render(
-        kennels=[k], embed=True, style=style, proof=True, request=None)
+        kennels=[k], embed=True, style=style, proof=True,
+        font_faces=font_face_css(), request=None)
     safe = "".join(c for c in (k.get("kennel_name") or f"kennel{kennel_id}")
                    if c.isalnum() or c in " -_").strip().replace(" ", "_") or f"kennel{kennel_id}"
     pdf_path = config.DATA_DIR / "proofs" / f"{safe}_{config.SHOW_YEAR}.pdf"

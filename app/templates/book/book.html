@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>ESSFTA Breeder Showcase {{ SHOW_YEAR }}</title>
+<style>{{ font_faces|safe }}</style>
 <style>
   /* ---- Anniversary (modern) theme = defaults ---- */
   :root{
@@ -10,8 +11,8 @@
     --gold:#c8a53a; --gold-dark:#a8862a; --cream:#f6f1e2;
     --ink:#26251f; --line:#c9c2ab; --muted:#6b6858;
     /* themeable tokens */
-    --font:"Helvetica Neue",Helvetica,Arial,sans-serif;
-    --label-font:"Helvetica Neue",Helvetica,Arial,sans-serif;  /* box headers */
+    --font:"ESSSans","Helvetica Neue",Helvetica,Arial,sans-serif;
+    --label-font:"ESSSans","Helvetica Neue",Helvetica,Arial,sans-serif;  /* box headers */
     --label:var(--green); --band-c:var(--green-dark); --divider:var(--gold);
     --kn-c:var(--green-dark); --lbl-c:var(--gold-dark); --chk-on:var(--green);
     --foot-c:var(--gold-dark); --radius:4px; --frame-bg:var(--cream);
@@ -20,7 +21,7 @@
   /* ---- Classic theme = green & burgundy on white ----
      box headers (labels) = sans-serif; entered info (values) = serif. */
   body.theme-classic{
-    --font:Georgia,"Times New Roman",serif;      /* entered info = serif */
+    --font:"ESSSerif",Georgia,"Times New Roman",serif;      /* entered info = serif */
     --divider:#b9b3a0; --kn-c:#1f1f1f; --foot-c:#9a9a90;
     --radius:2px; --frame-bg:#f3f1ea; --ped-bg:#ffffff; --ped-line:#9a9585;
   }
@@ -155,25 +156,34 @@
 <script>
 // Guarantee one physical page per entry: if an entry's content would exceed
 // the sheet, scale it down just enough to fit (never spills to page 2, never
-// clips). Footer stays pinned. Runs before Playwright captures the PDF.
-document.querySelectorAll('.page:not(.cover):not(.blank)').forEach(function(page){
-  var foot = page.querySelector('.foot');
-  var wrap = document.createElement('div');
-  Array.prototype.slice.call(page.children).forEach(function(c){
-    if (c !== foot) wrap.appendChild(c);
+// clips). Footer stays pinned. Waits for the embedded fonts to load first, so
+// measurement uses the real (not fallback) metrics.
+function fitPages(){
+  document.querySelectorAll('.page:not(.cover):not(.blank)').forEach(function(page){
+    var foot = page.querySelector('.foot');
+    var wrap = document.createElement('div');
+    Array.prototype.slice.call(page.children).forEach(function(c){
+      if (c !== foot) wrap.appendChild(c);
+    });
+    page.insertBefore(wrap, foot || null);
+    var cs = getComputedStyle(page);
+    // reserve room for the absolutely-positioned footer (sits ~0.3in up)
+    var avail = page.clientHeight
+      - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
+      - (foot ? foot.offsetHeight + 22 : 0);
+    if (wrap.scrollHeight > avail) {
+      var scale = Math.max(0.55, avail / wrap.scrollHeight);
+      wrap.style.transformOrigin = 'top left';
+      wrap.style.width = (100 / scale) + '%';
+      wrap.style.transform = 'scale(' + scale.toFixed(4) + ')';
+    }
   });
-  page.insertBefore(wrap, foot || null);
-  var cs = getComputedStyle(page);
-  var avail = page.clientHeight
-    - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
-    - (foot ? foot.offsetHeight + 12 : 0);
-  if (wrap.scrollHeight > avail) {
-    var scale = Math.max(0.6, avail / wrap.scrollHeight);
-    wrap.style.transformOrigin = 'top left';
-    wrap.style.width = (100 / scale) + '%';
-    wrap.style.transform = 'scale(' + scale.toFixed(4) + ')';
-  }
-});
+}
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(fitPages);
+} else {
+  fitPages();
+}
 </script>
 </body>
 </html>
