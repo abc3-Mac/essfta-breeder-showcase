@@ -1,6 +1,6 @@
 <div class="page sheet-dog">
   <div class="sheet-head">
-    <div class="lbl">Dog's Registered Name with Titles</div>
+    <div class="lbl">Dog &middot; Registered Name with Titles</div>
     <div class="kn" style="font-size:19px">{{ d.registered_name }}</div>
   </div>
 
@@ -25,14 +25,26 @@
   <div class="ped-health">
     <div>
       <div class="cap" style="text-align:left;margin-bottom:4px">Pedigree</div>
-      <div class="ped">
-        <div class="node"><strong>{{ d.registered_name }}</strong></div>
-        <div class="node gen2">{{ d.pedigree_json.get('sire','') }}</div>
-        <div class="node gen2">{{ d.pedigree_json.get('sire_sire','') }}</div>
-        <div class="node gen2">{{ d.pedigree_json.get('sire_dam','') }}</div>
-        <div class="node gen2">{{ d.pedigree_json.get('dam','') }}</div>
-        <div class="node gen2">{{ d.pedigree_json.get('dam_sire','') }}</div>
-        <div class="node gen2">{{ d.pedigree_json.get('dam_dam','') }}</div>
+      <div class="ped-tree">
+        <div class="pcol subject">
+          <div class="pcell"><div class="pbox pb-subj">{{ d.registered_name }}</div></div>
+        </div>
+        <div class="pcol parents">
+          <div class="pgroup">
+            <div class="pcell"><div class="pbox"><span class="plabel">Sire</span>{{ d.pedigree_json.get('sire','') }}</div></div>
+            <div class="pcell"><div class="pbox"><span class="plabel">Dam</span>{{ d.pedigree_json.get('dam','') }}</div></div>
+          </div>
+        </div>
+        <div class="pcol grands">
+          <div class="pgroup">
+            <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('sire_sire','') }}</div></div>
+            <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('sire_dam','') }}</div></div>
+          </div>
+          <div class="pgroup">
+            <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('dam_sire','') }}</div></div>
+            <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('dam_dam','') }}</div></div>
+          </div>
+        </div>
       </div>
     </div>
     <div>

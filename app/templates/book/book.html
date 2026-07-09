@@ -11,20 +11,22 @@
     --ink:#26251f; --line:#c9c2ab; --muted:#6b6858;
     /* themeable tokens */
     --font:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --label-font:"Helvetica Neue",Helvetica,Arial,sans-serif;  /* box headers */
     --label:var(--green); --band-c:var(--green-dark); --divider:var(--gold);
     --kn-c:var(--green-dark); --lbl-c:var(--gold-dark); --chk-on:var(--green);
     --foot-c:var(--gold-dark); --radius:4px; --frame-bg:var(--cream);
-    --ped-bg:#eef1e6;
+    --ped-bg:#eef1e6; --ped-line:#b9b3a0;
   }
-  /* ---- Classic theme = matches the 2024 InDesign template ---- */
+  /* ---- Classic theme = green & burgundy on white ----
+     box headers (labels) = sans-serif; entered info (values) = serif. */
   body.theme-classic{
-    --font:Georgia,"Times New Roman",serif;
+    --font:Georgia,"Times New Roman",serif;      /* entered info = serif */
     --divider:#b9b3a0; --kn-c:#1f1f1f; --foot-c:#9a9a90;
-    --radius:2px; --frame-bg:#f3f1ea; --ped-bg:#dfe4cf;
+    --radius:2px; --frame-bg:#f3f1ea; --ped-bg:#ffffff; --ped-line:#9a9585;
   }
-  /* classic uses page-type label colors: kennel=maroon, dog=green */
-  body.theme-classic .sheet-kennel{ --label:#8a2a2a; --band-c:#8a2a2a; --lbl-c:#8a2a2a; --chk-on:#4a4a44; }
-  body.theme-classic .sheet-dog{ --label:#3f6f34; --band-c:#3f6f34; --lbl-c:#3f6f34; --chk-on:#3f6f34; }
+  /* page-type header colors: KENNEL pages = burgundy, DOG pages = green */
+  body.theme-classic .sheet-kennel{ --label:#7a1f2b; --band-c:#7a1f2b; --lbl-c:#7a1f2b; --chk-on:#4a4a44; }
+  body.theme-classic .sheet-dog{ --label:#1e6b39; --band-c:#1e6b39; --lbl-c:#1e6b39; --chk-on:#1e6b39; }
 
   @page { size: Letter; margin: 0; }
   * { box-sizing: border-box; }
@@ -66,12 +68,12 @@
   /* Shared page header */
   .sheet-head { text-align:center; border-bottom:2px solid var(--divider); padding-bottom:6px; margin-bottom:12px; }
   .sheet-head .kn { font-size:22px; font-weight:800; color:var(--kn-c); letter-spacing:.02em; }
-  .sheet-head .lbl { font-size:10px; letter-spacing:.16em; color:var(--lbl-c); text-transform:uppercase; }
+  .sheet-head .lbl { font-size:10px; letter-spacing:.16em; color:var(--lbl-c); text-transform:uppercase; font-family:var(--label-font); }
 
   /* Field grid */
   .field { margin-bottom:8px; }
   .field .cap { font-size:9px; letter-spacing:.1em; text-transform:uppercase;
-    color:var(--label); text-align:center; font-weight:700; }
+    color:var(--label); text-align:center; font-weight:700; font-family:var(--label-font); }
   .field .val { border:1px solid var(--line); border-radius:var(--radius); padding:6px 9px;
     min-height:16px; font-size:12.5px; background:#fff; }
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -79,9 +81,9 @@
 
   .band { text-align:center; color:var(--band-c); font-weight:800;
     text-transform:uppercase; letter-spacing:.05em; font-size:14px;
-    margin:12px 0 3px; }
+    margin:12px 0 3px; font-family:var(--label-font); }
   .band-sub { text-align:center; color:var(--muted); font-size:9px;
-    text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+    text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; font-family:var(--label-font); }
 
   .chk-line { font-size:11.5px; line-height:1.8; }
   .chk { color:var(--chk-on); font-weight:700; }
@@ -96,13 +98,29 @@
     background:var(--frame-bg); display:flex; align-items:center; justify-content:center;
     height:2.7in; }
   .photos .frame img { width:100%; height:100%; object-fit:cover; }
-  .ped-health { display:grid; grid-template-columns:1.5fr 1fr; gap:12px; }
-  .ped { background:var(--ped-bg); border:1px solid var(--line); border-radius:var(--radius); padding:10px; }
-  .ped .node { font-size:10.5px; padding:3px 6px; margin:3px 0; background:#fff;
-    border:1px solid var(--line); border-radius:var(--radius); }
-  .ped .gen2 { margin-left:18px; }
+  .ped-health { display:grid; grid-template-columns:1.55fr 1fr; gap:12px; }
+
+  /* 3-generation pedigree drawn as a bracket tree with connector lines */
+  .ped-tree { display:flex; height:2.55in; font-size:8.6px; align-items:stretch; }
+  .ped-tree .pcol { display:flex; flex-direction:column; justify-content:space-around; }
+  .ped-tree .subject { flex:1.02; } .ped-tree .parents { flex:1.1; } .ped-tree .grands { flex:1.15; }
+  .ped-tree .pcell { flex:1; display:flex; align-items:center; position:relative; padding:2px 0; }
+  .ped-tree .pbox { width:100%; border:1px solid var(--ped-line); background:#fff;
+    border-radius:var(--radius); padding:3px 5px; line-height:1.12; }
+  .ped-tree .pb-subj { font-weight:700; border:1.5px solid var(--band-c); background:var(--ped-bg); }
+  .ped-tree .plabel { font-family:var(--label-font); font-size:7px; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--muted); display:block; margin-bottom:1px; }
+  /* a pair of siblings + its bracket back to the parent node on the left */
+  .ped-tree .pgroup { display:flex; flex-direction:column; justify-content:space-around;
+    flex:1; position:relative; padding-left:18px; }
+  .ped-tree .pgroup::before { content:""; position:absolute; left:9px; top:25%; bottom:25%;
+    width:1px; background:var(--ped-line); }                 /* vertical bus joining the pair */
+  .ped-tree .pgroup::after { content:""; position:absolute; left:0; top:50%; width:9px;
+    height:1px; background:var(--ped-line); }                /* bus -> parent node */
+  .ped-tree .pgroup > .pcell::before { content:""; position:absolute; left:-9px; top:50%;
+    width:9px; height:1px; background:var(--ped-line); }     /* box -> bus */
   .health-tbl .val { display:flex; justify-content:space-between; gap:8px; }
-  .health-tbl .hk { color:var(--muted); font-size:10px; text-transform:uppercase; }
+  .health-tbl .hk { color:var(--muted); font-size:10px; text-transform:uppercase; font-family:var(--label-font); }
   .foot { position:absolute; bottom:0.3in; left:0; right:0; text-align:center;
     font-size:8px; color:var(--foot-c); letter-spacing:.12em; }
 </style>
