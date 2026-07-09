@@ -47,7 +47,7 @@
   <div class="band-sub">Registered name with titles &middot; career highlights</div>
   <div class="stack">
     {% for od in k.our_dogs_json %}
-      <div class="val"><strong>{{ od.name }}</strong>{% if od.highlights %}<div class="career">{{ od.highlights }}</div>{% endif %}</div>
+      <div class="val">{{ od.name }}{% if od.highlights %}<div class="career">{{ od.highlights }}</div>{% endif %}</div>
     {% endfor %}
   </div>
   {% endif %}
@@ -57,7 +57,7 @@
   <div class="band-sub">Registered name with titles &middot; date of birth &middot; certification numbers</div>
   <div class="stack">
     {% for st in k.at_stud_json %}
-      <div class="val"><strong>{{ st.name }}</strong>{% if st.dob %} &mdash; {{ st.dob }}{% endif %}{% if st.certs %}<div class="career">{{ st.certs }}</div>{% endif %}</div>
+      <div class="val">{{ st.name }}{% if st.dob %} &mdash; {{ st.dob }}{% endif %}{% if st.certs %}<div class="career">{{ st.certs }}</div>{% endif %}</div>
     {% endfor %}
   </div>
   {% endif %}
@@ -67,7 +67,7 @@
   <div class="band-sub">Sire &amp; dam registered name with titles &middot; estimated date of whelp</div>
   <div class="stack">
     {% for pb in k.planned_json %}
-      <div class="val"><strong>{{ pb.sire_dam }}</strong>{% if pb.whelp %} &mdash; {{ pb.whelp }}{% endif %}</div>
+      <div class="val">{{ pb.sire_dam }}{% if pb.whelp %} &mdash; {{ pb.whelp }}{% endif %}</div>
     {% endfor %}
   </div>
   {% endif %}
