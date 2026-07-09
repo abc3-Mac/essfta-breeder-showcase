@@ -62,20 +62,38 @@ def font_face_css() -> str:
     global _FONT_CACHE
     if _FONT_CACHE is not None:
         return _FONT_CACHE
+    # (family, filename, mime, format, weight-range)
+    specs = [
+        ("ESSSans", "SourceSans3.ttf", "font/ttf", "truetype", "200 900"),
+        ("ESSSerif", "SourceSerif4.ttf", "font/ttf", "truetype", "200 900"),
+        ("ESSScript", "Satisfy.woff2", "font/woff2", "woff2", "400"),  # cover title
+    ]
     faces = []
-    for family, fname in (("ESSSans", "SourceSans3.ttf"),
-                          ("ESSSerif", "SourceSerif4.ttf")):
+    for family, fname, mime, fmt, wght in specs:
         p = BASE / "static" / "fonts" / fname
         if not p.exists():
             continue
         b64 = base64.b64encode(p.read_bytes()).decode()
         faces.append(
             f'@font-face{{font-family:"{family}";'
-            f'src:url(data:font/ttf;base64,{b64}) format("truetype");'
-            f'font-weight:200 900;font-style:normal;font-display:swap;}}'
+            f'src:url(data:{mime};base64,{b64}) format("{fmt}");'
+            f'font-weight:{wght};font-style:normal;font-display:swap;}}'
         )
     _FONT_CACHE = "\n".join(faces)
     return _FONT_CACHE
+
+
+_LOGO_CACHE = None
+
+
+def cover_logo_uri() -> str:
+    """The ESSF Breeders' Showcase logo as a data URI (for the classic cover)."""
+    global _LOGO_CACHE
+    if _LOGO_CACHE is None:
+        p = BASE / "static" / "img" / "showcase-logo.png"
+        _LOGO_CACHE = ("data:image/png;base64," +
+                       base64.b64encode(p.read_bytes()).decode()) if p.exists() else ""
+    return _LOGO_CACHE
 
 
 STYLES = {"classic", "anniversary"}
@@ -89,7 +107,7 @@ def build_book_context(request, style: str = "anniversary") -> dict:
     """Context for the on-screen (network-served) HTML preview."""
     return {"request": request, "kennels": _kennels_with_dogs(),
             "embed": False, "style": _norm_style(style),
-            "font_faces": font_face_css()}
+            "font_faces": font_face_css(), "logo_uri": cover_logo_uri()}
 
 
 def _embed_photos(kennels: list):
@@ -105,7 +123,8 @@ def render_book_html(embed: bool = True, style: str = "anniversary") -> str:
         _embed_photos(kennels)
     tmpl = _env.get_template("book/book.html")
     return tmpl.render(kennels=kennels, embed=embed, style=_norm_style(style),
-                       font_faces=font_face_css(), request=None)
+                       font_faces=font_face_css(), logo_uri=cover_logo_uri(),
+                       request=None)
 
 
 def _render_pdf(html: str, pdf_path) -> str:
@@ -161,7 +180,7 @@ def assemble_kennel_pdf(kennel_id: int, style: str = "anniversary") -> str:
     _embed_photos([k])
     html = _env.get_template("book/book.html").render(
         kennels=[k], embed=True, style=style, proof=True,
-        font_faces=font_face_css(), request=None)
+        font_faces=font_face_css(), logo_uri=cover_logo_uri(), request=None)
     safe = "".join(c for c in (k.get("kennel_name") or f"kennel{kennel_id}")
                    if c.isalnum() or c in " -_").strip().replace(" ", "_") or f"kennel{kennel_id}"
     pdf_path = config.DATA_DIR / "proofs" / f"{safe}_{config.SHOW_YEAR}.pdf"

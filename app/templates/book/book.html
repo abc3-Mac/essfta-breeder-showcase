@@ -57,14 +57,17 @@
   .cover .years { margin-top:0.28in; font-size:14px; color:var(--cream); line-height:1.5; }
   .cover .theme { margin-top:0.35in; font-size:26px; font-style:italic;
     color:var(--gold); font-weight:700; }
-  /* Cover (classic) — clean white, serif */
-  body.theme-classic .cover { background:#fff; color:#1f1f1f; }
-  body.theme-classic .cover .ring { border-color:#8a2a2a; }
-  body.theme-classic .cover .ring .yrs { color:#8a2a2a; }
-  body.theme-classic .cover .ring .anniv { color:#3f6f34; }
-  body.theme-classic .cover .tag { color:#3f6f34; }
-  body.theme-classic .cover .years { color:#555; }
-  body.theme-classic .cover .theme { color:#8a2a2a; }
+  /* Cover (classic) = ESSF Breeders' Showcase — cream with burgundy bands */
+  .cover-showcase { background:#f1ead9; color:#1e1e1e; display:block; padding:0; text-align:center; }
+  .cover-showcase .cs-top { position:absolute; top:0; left:0; right:0; height:0.34in; background:#6b2022; }
+  .cover-showcase .cs-logo { display:block; margin:1.3in auto 0; width:2.5in; height:auto; }
+  .cover-showcase .cs-title { font-family:"ESSScript",cursive; font-size:52px; color:#1a1a1a;
+    line-height:1.18; margin:0.4in 0.6in 0; }
+  .cover-showcase .cs-kennels { font-family:"ESSSerif",Georgia,serif; font-size:19px;
+    letter-spacing:.04em; color:#2b2b2b; line-height:1.95; margin:0.5in 0.9in 0; }
+  .cover-showcase .cs-bottom { position:absolute; bottom:0; left:0; right:0; background:#6b2022;
+    color:#fff; font-family:"ESSSerif",Georgia,serif; font-weight:700; font-size:18px;
+    line-height:1.35; padding:0.3in 0.4in; }
 
   /* Shared page header */
   .sheet-head { text-align:center; border-bottom:2px solid var(--divider); padding-bottom:6px; margin-bottom:12px; }
@@ -132,6 +135,17 @@
 
   {% if not proof %}
   <!-- Cover -->
+  {% if style == 'classic' %}
+  <div class="page cover cover-showcase">
+    <div class="cs-top"></div>
+    {% if logo_uri %}<img class="cs-logo" src="{{ logo_uri }}" alt="ESSF">{% endif %}
+    <div class="cs-title">{{ SHOW_YEAR }} National<br>Breeders&rsquo; Showcase</div>
+    <div class="cs-kennels">
+      {% for k in kennels %}{{ k.kennel_name|upper }}{% if not loop.last %} &nbsp;&#124;&nbsp; {% endif %}{% endfor %}
+    </div>
+    <div class="cs-bottom">The English Springer Spaniel<br>Field Trial Association Foundation</div>
+  </div>
+  {% else %}
   <div class="page cover">
     <div class="ring">
       <div class="yrs">100</div>
@@ -143,6 +157,7 @@
     <div class="theme">&ldquo;Paw-cific Northwest!&rdquo;</div>
     <div class="years">{{ SHOW_YEAR }} National Specialty &middot; October 10&ndash;17, {{ SHOW_YEAR }}<br>Linn County Expo Center &middot; Albany, Oregon</div>
   </div>
+  {% endif %}
 
   <!-- Intentional blank page after the title page (for print/binding) -->
   <div class="page blank"></div>
