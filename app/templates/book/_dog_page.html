@@ -7,10 +7,9 @@
   <div class="field"><div class="cap">Breeder's Name(s)</div><div class="val">{{ d.breeders }}</div></div>
   <div class="grid2">
     <div class="field"><div class="cap">Primary Owner's Name</div><div class="val">{{ d.owner_name }}</div></div>
-    <div class="field"><div class="cap">Primary Owner's Location</div><div class="val">{{ d.owner_address }}</div></div>
+    <div class="field"><div class="cap">Location / Address</div><div class="val">{{ d.owner_address }}</div></div>
   </div>
-  <div class="grid3">
-    <div class="field"><div class="cap">Call Name</div><div class="val">{{ d.call_name }}</div></div>
+  <div class="grid2">
     <div class="field"><div class="cap">Email</div><div class="val">{{ d.owner_email }}</div></div>
     <div class="field"><div class="cap">Phone</div><div class="val">{{ d.owner_phone }}</div></div>
   </div>
@@ -22,43 +21,40 @@
     <div class="frame">{% if p2 %}<img src="{{ p2 }}" alt="">{% endif %}</div>
   </div>
 
-  <div class="ped-health">
-    <div>
-      <div class="cap" style="text-align:left;margin-bottom:4px">Pedigree</div>
-      <div class="ped-tree">
-        <div class="pcol subject">
-          <div class="pcell"><div class="pbox pb-subj">{{ d.registered_name }}</div></div>
-        </div>
-        <div class="pcol parents">
-          <div class="pgroup">
-            <div class="pcell"><div class="pbox"><span class="plabel">Sire</span>{{ d.pedigree_json.get('sire','') }}</div></div>
-            <div class="pcell"><div class="pbox"><span class="plabel">Dam</span>{{ d.pedigree_json.get('dam','') }}</div></div>
-          </div>
-        </div>
-        <div class="pcol grands">
-          <div class="pgroup">
-            <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('sire_sire','') }}</div></div>
-            <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('sire_dam','') }}</div></div>
-          </div>
-          <div class="pgroup">
-            <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('dam_sire','') }}</div></div>
-            <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('dam_dam','') }}</div></div>
-          </div>
-        </div>
+  <div class="grid3">
+    <div class="field"><div class="cap">Call Name</div><div class="val">{{ d.call_name }}</div></div>
+    <div class="field"><div class="cap">Date of Birth</div><div class="val">{{ d.dob }}</div></div>
+    <div class="field"><div class="cap">Color</div><div class="val">{{ d.color }}</div></div>
+  </div>
+
+  <div class="band">Pedigree</div>
+  <div class="ped-tree">
+    <div class="pcol subject">
+      <div class="pcell"><div class="pbox pb-subj">{{ d.registered_name }}</div></div>
+    </div>
+    <div class="pcol parents">
+      <div class="pgroup">
+        <div class="pcell"><div class="pbox"><span class="plabel">Sire</span>{{ d.pedigree_json.get('sire','') }}</div></div>
+        <div class="pcell"><div class="pbox"><span class="plabel">Dam</span>{{ d.pedigree_json.get('dam','') }}</div></div>
       </div>
     </div>
-    <div>
-      <div class="grid2" style="grid-template-columns:1fr 1fr">
-        <div class="field"><div class="cap">Date of Birth</div><div class="val">{{ d.dob }}</div></div>
-        <div class="field"><div class="cap">Color</div><div class="val">{{ d.color }}</div></div>
+    <div class="pcol grands">
+      <div class="pgroup">
+        <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('sire_sire','') }}</div></div>
+        <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('sire_dam','') }}</div></div>
       </div>
-      <div class="cap" style="margin:4px 0">Health Clearances</div>
-      <div class="health-tbl">
-        {% for key, label in DOG_HEALTH_FIELDS %}
-          <div class="val"><span class="hk">{{ label }}</span><span>{{ d.health_json.get(key,'') }}</span></div>
-        {% endfor %}
+      <div class="pgroup">
+        <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('dam_sire','') }}</div></div>
+        <div class="pcell"><div class="pbox">{{ d.pedigree_json.get('dam_dam','') }}</div></div>
       </div>
     </div>
+  </div>
+
+  <div class="band">Health Clearances</div>
+  <div class="grid3">
+    {% for key, label in DOG_HEALTH_FIELDS %}
+      <div class="field"><div class="cap">{{ label }}</div><div class="val">{{ d.health_json.get(key,'') }}</div></div>
+    {% endfor %}
   </div>
 
   <div class="band">Show / Performance Career Highlights</div>
@@ -68,5 +64,5 @@
   {% if d.wish_list %}<div class="band">Wish List of Virtues</div><div class="val">{{ d.wish_list }}</div>{% endif %}
   {% if d.has_produced %}<div class="band">Has Produced</div><div class="val">{{ d.has_produced }}</div>{% endif %}
 
-  <div class="foot">{{ k.kennel_name }} &middot; ESSFTA BREEDER SHOWCASE &middot; 1926&ndash;2026</div>
+  <div class="foot">ESSFTA FOUNDATION BREEDERS&rsquo; SHOWCASE &middot; 100 YEARS &middot; 1926&ndash;2026</div>
 </div>

@@ -75,10 +75,10 @@ def send_entry_copy(kennel: dict, dogs: list, pdf_path: str) -> bool:
     to = ", ".join(recips)
     kname = kennel.get("kennel_name") or "your kennel"
     dog_names = ", ".join(d.get("call_name") or d.get("registered_name") or "?" for d in dogs) or "no dogs yet"
-    subject = f"Your ESSFTA Breeder Showcase entry — {kname}"
+    subject = f"Your ESSFTA Foundation Breeders' Showcase entry — {kname}"
     text = (
         f"Thank you for submitting your entry to the ESSFTA {config.SHOW_YEAR} "
-        f"National Specialty Breeder Showcase.\n\n"
+        f"National Specialty Breeders' Showcase.\n\n"
         f"Attached is a PDF proof of your pages exactly as they'll appear in the "
         f"booklet:\nKennel: {kname}\nDogs: {dog_names}\n\n"
         f"Please review it. If anything needs changing, sign back in at "
@@ -92,7 +92,7 @@ def send_entry_copy(kennel: dict, dogs: list, pdf_path: str) -> bool:
     <h2 style="margin:10px 0 0">Thank you!</h2>
   </div>
   <div style="border:1px solid #d8d2bf;border-top:none;padding:22px;border-radius:0 0 8px 8px">
-    <p>Your entry to the {config.SHOW_YEAR} National Specialty <strong>Breeder Showcase</strong> has been received.</p>
+    <p>Your entry to the {config.SHOW_YEAR} National Specialty <strong>Breeders&rsquo; Showcase</strong> has been received.</p>
     <p>Attached is a <strong>PDF proof</strong> of your pages exactly as they&rsquo;ll appear in the booklet:</p>
     <p style="font-size:15px"><strong>{kname}</strong><br><span style="color:#6b6858">Dogs: {dog_names}</span></p>
     <p>Please review it. Need a change? Sign back in at
@@ -121,9 +121,9 @@ def send_admin_notice(kennel: dict, dogs: list) -> bool:
     owner = kennel.get("owner_name") or ""
     dog_names = ", ".join(d.get("call_name") or d.get("registered_name") or "?" for d in dogs) or "none"
     link = f"{config.BASE_URL}/kennel/{kennel['id']}"
-    subject = f"Breeder Showcase entry submitted: {kname}"
+    subject = f"Breeders' Showcase entry submitted: {kname}"
     text = (
-        f"A breeder marked their {config.SHOW_YEAR} Breeder Showcase entry complete.\n\n"
+        f"A breeder marked their {config.SHOW_YEAR} Breeders' Showcase entry complete.\n\n"
         f"Kennel: {kname}\nOwner: {owner}\nContact: {kennel.get('email','')} "
         f"{kennel.get('phone','')}\nDogs ({len(dogs)}): {dog_names}\n\n"
         f"Review/edit: {link}\n"
@@ -131,7 +131,7 @@ def send_admin_notice(kennel: dict, dogs: list) -> bool:
     html = f"""\
 <div style="font-family:Georgia,serif;max-width:520px;margin:auto;color:#26251f">
   <h2 style="color:#15532f">Entry submitted &middot; {kname}</h2>
-  <p>A breeder marked their {config.SHOW_YEAR} Breeder Showcase entry complete.</p>
+  <p>A breeder marked their {config.SHOW_YEAR} Breeders&rsquo; Showcase entry complete.</p>
   <table style="font-size:14px;border-collapse:collapse">
     <tr><td style="color:#6b6858;padding:2px 10px 2px 0">Kennel</td><td>{kname}</td></tr>
     <tr><td style="color:#6b6858;padding:2px 10px 2px 0">Owner</td><td>{owner}</td></tr>
@@ -156,10 +156,10 @@ def send_admin_notice(kennel: dict, dogs: list) -> bool:
 
 
 def send_invite(to: str, link: str, inviter: str = "ESSFTA") -> bool:
-    subject = f"You're invited to the ESSFTA {config.SHOW_YEAR} Breeder Showcase"
+    subject = f"You're invited to the ESSFTA Foundation {config.SHOW_YEAR} Breeders' Showcase"
     text = (
         f"{inviter} has invited you to add your kennel to the ESSFTA "
-        f"{config.SHOW_YEAR} National Specialty Breeder Showcase booklet.\n\n"
+        f"{config.SHOW_YEAR} National Specialty Breeders' Showcase booklet.\n\n"
         f"Click to get started (no password needed):\n{link}\n\n"
         f"You'll fill in your kennel information and up to 3 dogs, with 2 photos "
         f"each. You can save and come back anytime.\n\n"
@@ -170,12 +170,12 @@ def send_invite(to: str, link: str, inviter: str = "ESSFTA") -> bool:
 <div style="font-family:Georgia,serif;max-width:540px;margin:auto;color:#26251f">
   <div style="background:#0d3b23;color:#f6f1e2;padding:20px;text-align:center;border-radius:8px 8px 0 0">
     <div style="border:2px solid #c8a53a;color:#c8a53a;border-radius:999px;display:inline-block;padding:4px 14px;font-family:Helvetica,Arial,sans-serif;font-size:12px;letter-spacing:.1em">100 YEARS &middot; 1926&ndash;2026</div>
-    <h2 style="margin:12px 0 0">ESSFTA Breeder Showcase</h2>
+    <h2 style="margin:12px 0 0">ESSFTA Foundation Breeders&rsquo; Showcase</h2>
     <div style="color:#c8a53a;font-style:italic">&ldquo;Paw-cific Northwest!&rdquo;</div>
   </div>
   <div style="border:1px solid #d8d2bf;border-top:none;padding:22px;border-radius:0 0 8px 8px">
     <p>You've been invited to add your kennel to the {config.SHOW_YEAR} National
-       Specialty Breeder Showcase booklet.</p>
+       Specialty Breeders&rsquo; Showcase booklet.</p>
     <p>You'll enter your kennel information and up to <strong>3 dogs</strong>
        (2 photos each). No password — just click below. You can save and return
        anytime.</p>
@@ -200,16 +200,16 @@ def send_invite(to: str, link: str, inviter: str = "ESSFTA") -> bool:
 
 
 def send_magic_link(to: str, link: str) -> bool:
-    subject = f"Your ESSFTA Breeder Showcase sign-in link"
+    subject = f"Your ESSFTA Foundation Breeders' Showcase sign-in link"
     text = (
-        f"Click to sign in to the ESSFTA {config.SHOW_YEAR} Breeder Showcase:\n\n"
+        f"Click to sign in to the ESSFTA Foundation {config.SHOW_YEAR} Breeders' Showcase:\n\n"
         f"{link}\n\n"
         f"This link is good for {config.MAGIC_LINK_TTL_MIN} minutes and can be "
         f"used once. If you didn't request it, you can ignore this email."
     )
     html = f"""\
 <div style="font-family:Georgia,serif;max-width:520px;margin:auto;color:#26251f">
-  <h2 style="color:#15532f">ESSFTA Breeder Showcase</h2>
+  <h2 style="color:#15532f">ESSFTA Foundation Breeders&rsquo; Showcase</h2>
   <p>Click below to sign in and work on your kennel entry.</p>
   <p style="margin:28px 0">
     <a href="{link}" style="background:#15532f;color:#fff;padding:12px 22px;

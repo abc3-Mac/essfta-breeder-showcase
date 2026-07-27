@@ -6,6 +6,12 @@
     <span class="pill {{ k.status }}">{{ k.status }}</span>
   </div>
   <p class="hint">Fill this out as you'd like it to appear in the booklet. You can save and come back anytime.</p>
+  {% if entries_locked() %}
+  <p class="hint" style="background:#fbf3d6;border:1px solid #d9c98a;border-radius:6px;padding:10px 12px;color:#6b5a1e">
+    <strong>Entries closed {{ deadline_text() }}.</strong> Your entry is now read-only.
+    Please contact the Showcase chair if something needs correcting.
+  </p>
+  {% endif %}
 
   <form method="post" action="/kennel/{{ k.id }}" id="kennelForm">
     <div class="row">
@@ -35,11 +41,11 @@
 
     <div class="row">
       <div class="col">
-        <label>Social media / Facebook profile</label>
+        <label>Website / Social Media</label>
         <input type="text" name="social_media" value="{{ k.social_media }}">
       </div>
       <div class="col">
-        <label>Year started in English Springer Spaniels</label>
+        <label>Year Started</label>
         <input type="text" name="year_started" value="{{ k.year_started }}">
       </div>
     </div>
@@ -108,8 +114,10 @@
     {% endfor %}
 
     <div class="actions">
+      {% if not entries_locked() %}
       <button class="btn" type="submit" name="_action" value="save">Save</button>
       <button class="btn gold" type="submit" name="_action" value="submit">Save &amp; mark complete</button>
+      {% endif %}
     </div>
   </form>
 </div>
@@ -124,18 +132,22 @@
     </span>
   {% endfor %}
   {% if dogs|length < MAX_DOGS %}
-    <form method="post" action="/kennel/{{ k.id }}/dog/new" style="margin-top:14px">
-      <button class="btn gold" type="submit">+ Add a dog</button>
-    </form>
+    {% if not entries_locked() %}
+      <form method="post" action="/kennel/{{ k.id }}/dog/new" style="margin-top:14px">
+        <button class="btn gold" type="submit">+ Add a dog</button>
+      </form>
+    {% endif %}
   {% else %}
     <p class="hint" style="margin-top:14px">You've reached the {{ MAX_DOGS }}-dog limit.</p>
   {% endif %}
 </div>
 
+{% if not entries_locked() %}
 <div class="card">
   <form method="post" action="/kennel/{{ k.id }}/delete"
         onsubmit="return confirm('Delete this entire kennel entry and its dogs? This cannot be undone.')">
     <button class="btn danger small" type="submit">Delete this kennel entry</button>
   </form>
 </div>
+{% endif %}
 {% endblock %}

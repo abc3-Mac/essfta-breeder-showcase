@@ -1,5 +1,5 @@
 """
-SQLite data layer for the ESSFTA Breeder Showcase.
+SQLite data layer for the ESSFTA Foundation Breeders' Showcase.
 
 Design note: the whole point of this app (vs. the JotForm attempt that
 "jumbled up") is structural integrity. Every dog carries a `kennel_id`

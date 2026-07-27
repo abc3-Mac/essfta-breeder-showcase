@@ -163,7 +163,7 @@ def assemble_pdf(style: str = "anniversary") -> str:
     """Render the full book to a PDF and return its path."""
     style = _norm_style(style)
     html = render_book_html(embed=True, style=style)
-    pdf_path = config.DATA_DIR / "books" / f"ESSFTA_Breeder_Showcase_{config.SHOW_YEAR}_{style}.pdf"
+    pdf_path = config.DATA_DIR / "books" / f"ESSFTA_Foundation_Breeders_Showcase_{config.SHOW_YEAR}_{style}.pdf"
     return _render_pdf(html, pdf_path)
 
 

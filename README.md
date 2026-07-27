@@ -1,4 +1,4 @@
-# ESSFTA Breeder Showcase
+# ESSFTA Foundation Breeders' Showcase
 
 A web app that collects **Kennel** and **Dog** entries from ESSFTA breeders and
 assembles them into a print-ready **PDF booklet** — replacing the old

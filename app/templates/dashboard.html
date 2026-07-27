@@ -21,10 +21,16 @@
     <p class="hint">You haven't started an entry yet.</p>
   {% endif %}
 
+  {% if not entries_locked() %}
   <form method="post" action="/kennel/new">
     <div class="actions">
       <button class="btn gold" type="submit">+ Start a kennel entry</button>
     </div>
   </form>
+  {% else %}
+  <p class="hint" style="background:#fbf3d6;border:1px solid #d9c98a;border-radius:6px;padding:10px 12px;color:#6b5a1e">
+    <strong>Entries closed {{ deadline_text() }}.</strong> You can still view what you submitted.
+  </p>
+  {% endif %}
 </div>
 {% endblock %}

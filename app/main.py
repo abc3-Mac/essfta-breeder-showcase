@@ -1,5 +1,5 @@
 """
-ESSFTA Breeder Showcase — FastAPI application.
+ESSFTA Foundation Breeders' Showcase — FastAPI application.
 
 Flow:
   1. Kennel owner enters email -> receives a magic link (Mailgun).
@@ -8,6 +8,7 @@ Flow:
   4. Admins (Albert / Patty) can see & edit everything and assemble the book.
 """
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Form, UploadFile, File, HTTPException
@@ -21,7 +22,7 @@ from . import config, db, images, mail
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("showcase")
 
-app = FastAPI(title="ESSFTA Breeder Showcase")
+app = FastAPI(title="ESSFTA Foundation Breeders' Showcase")
 app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY, max_age=60 * 60 * 12)
 
 BASE = Path(__file__).resolve().parent
@@ -42,6 +43,11 @@ templates.env.globals.update(
     MAX_OUR_DOGS=config.MAX_OUR_DOGS,
     MAX_AT_STUD=config.MAX_AT_STUD,
     MAX_PLANNED=config.MAX_PLANNED_BREEDINGS,
+)
+# Callables, so the templates re-evaluate the deadline on every render.
+templates.env.globals.update(
+    entries_locked=lambda: entries_locked(),
+    deadline_text=lambda: deadline_text(),
 )
 
 
@@ -86,6 +92,31 @@ def _guard_kennel(request: Request, kennel_id: int) -> dict:
     if not can_edit_kennel(request, k):
         raise HTTPException(403, "You don't have access to this kennel entry.")
     return k
+
+
+# --- Entry deadline ----------------------------------------------------------
+def entries_locked() -> bool:
+    """True once the submission window has closed (see config.ENTRY_DEADLINE)."""
+    return datetime.now(timezone.utc) >= config.ENTRY_DEADLINE
+
+
+def deadline_text() -> str:
+    return config.ENTRY_DEADLINE.strftime("%B %-d, %Y")
+
+
+def _require_open(request: Request) -> None:
+    """
+    Block every write once the deadline passes. Admins are exempt, and reads are
+    untouched — a breeder can still sign in and look at what they submitted.
+    Called from the write routes rather than the guards, which also serve GETs.
+    """
+    if entries_locked() and not is_admin(request):
+        raise HTTPException(
+            403,
+            f"Breeder Showcase entries closed on {deadline_text()} and can no "
+            f"longer be changed. Please contact the Showcase chair if something "
+            f"needs correcting.",
+        )
 
 
 # --- Auth --------------------------------------------------------------------
@@ -148,6 +179,7 @@ def dashboard(request: Request):
 @app.post("/kennel/new")
 def kennel_new(request: Request):
     u = require_user(request)
+    _require_open(request)
     k = db.create_kennel(u["email"], config.SHOW_YEAR)
     return RedirectResponse(f"/kennel/{k['id']}", status_code=302)
 
@@ -166,6 +198,7 @@ def kennel_edit(request: Request, kennel_id: int):
 @app.post("/kennel/{kennel_id}")
 async def kennel_save(request: Request, kennel_id: int):
     _guard_kennel(request, kennel_id)
+    _require_open(request)
     form = await request.form()
 
     def slist(prefix, n):
@@ -230,6 +263,7 @@ async def kennel_save(request: Request, kennel_id: int):
 @app.post("/kennel/{kennel_id}/delete")
 def kennel_delete(request: Request, kennel_id: int):
     _guard_kennel(request, kennel_id)
+    _require_open(request)
     for d in db.list_dogs(kennel_id):
         images.delete_photo(d.get("photo1_path"))
         images.delete_photo(d.get("photo2_path"))
@@ -242,6 +276,7 @@ def kennel_delete(request: Request, kennel_id: int):
 @app.post("/kennel/{kennel_id}/dog/new")
 def dog_new(request: Request, kennel_id: int):
     _guard_kennel(request, kennel_id)
+    _require_open(request)
     if db.count_dogs(kennel_id) >= config.MAX_DOGS_PER_KENNEL:
         raise HTTPException(400, f"Limit is {config.MAX_DOGS_PER_KENNEL} dogs per kennel.")
     d = db.create_dog(kennel_id)
@@ -268,6 +303,7 @@ def dog_edit(request: Request, dog_id: int):
 @app.post("/dog/{dog_id}")
 async def dog_save(request: Request, dog_id: int):
     _guard_dog(request, dog_id)
+    _require_open(request)
     form = await request.form()
     fields = {
         "registered_name": form.get("registered_name", "").strip(),
@@ -297,6 +333,7 @@ async def dog_save(request: Request, dog_id: int):
 @app.post("/dog/{dog_id}/photo/{slot}")
 async def dog_photo(request: Request, dog_id: int, slot: int, photo: UploadFile = File(...)):
     d, _ = _guard_dog(request, dog_id)
+    _require_open(request)
     if slot not in (1, 2):
         raise HTTPException(400, "Bad photo slot")
     if photo.content_type not in config.ALLOWED_IMAGE_TYPES:
@@ -314,6 +351,7 @@ async def dog_photo(request: Request, dog_id: int, slot: int, photo: UploadFile 
 @app.post("/dog/{dog_id}/photo/{slot}/delete")
 def dog_photo_delete(request: Request, dog_id: int, slot: int):
     d, _ = _guard_dog(request, dog_id)
+    _require_open(request)
     col = f"photo{slot}_path"
     images.delete_photo(d.get(col))
     db.update_dog(dog_id, {col: ""})
@@ -323,6 +361,7 @@ def dog_photo_delete(request: Request, dog_id: int, slot: int):
 @app.post("/dog/{dog_id}/delete")
 def dog_delete(request: Request, dog_id: int):
     d, _ = _guard_dog(request, dog_id)
+    _require_open(request)
     kennel_id = d["kennel_id"]
     images.delete_photo(d.get("photo1_path"))
     images.delete_photo(d.get("photo2_path"))
@@ -398,7 +437,7 @@ def book_assemble(request: Request, style: str = Form("anniversary")):
     return FileResponse(
         pdf_path,
         media_type="application/pdf",
-        filename=f"ESSFTA_Breeder_Showcase_{config.SHOW_YEAR}_{style}.pdf",
+        filename=f"ESSFTA_Foundation_Breeders_Showcase_{config.SHOW_YEAR}_{style}.pdf",
     )
 
 

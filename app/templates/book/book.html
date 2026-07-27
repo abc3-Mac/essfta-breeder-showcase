@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>ESSFTA Breeder Showcase {{ SHOW_YEAR }}</title>
+<title>ESSFTA Foundation Breeders&rsquo; Showcase {{ SHOW_YEAR }}</title>
 <style>{{ font_faces|safe }}</style>
 <style>
   /* ---- Anniversary (modern) theme = defaults ---- */
@@ -70,33 +70,42 @@
     line-height:1.35; padding:0.3in 0.4in; }
 
   /* Shared page header */
-  .sheet-head { text-align:center; border-bottom:2px solid var(--divider); padding-bottom:6px; margin-bottom:12px; }
+  .sheet-head { text-align:center; border-bottom:2px solid var(--divider); padding-bottom:4px; margin-bottom:8px; }
   .sheet-head .kn { font-size:15px; font-weight:400; color:var(--kn-c); letter-spacing:.02em; }
-  .sheet-head .lbl { font-size:10px; letter-spacing:.16em; color:var(--lbl-c); text-transform:uppercase; font-family:var(--label-font); }
+  /* page eyebrow matches the section bands (OUR DOGS / AT STUD) in size + weight */
+  .sheet-head .lbl { font-size:13pt; font-weight:800; letter-spacing:.16em; color:var(--lbl-c); text-transform:uppercase; font-family:var(--label-font); }
 
   /* Field grid */
-  .field { margin-bottom:8px; }
-  .field .cap { font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  .field { margin-bottom:4px; }
+  /* not scoped to .field — the Pedigree / Health Clearances labels sit outside one */
+  .cap { font-size:8pt; letter-spacing:.1em; text-transform:uppercase;
     color:var(--label); text-align:center; font-weight:700; font-family:var(--label-font); }
-  .field .val { border:1px solid var(--line); border-radius:var(--radius); padding:6px 9px;
-    min-height:16px; font-size:12.5px; background:#fff; }
-  .val { text-align:center; }                 /* entered info centered in its box */
+  /* min-height covers one full line + padding + border, so an empty box is
+     exactly as tall as a filled one (box-sizing is border-box) */
+  .field .val { border:1px solid var(--line); border-radius:var(--radius); padding:4px 9px;
+    line-height:1.25; min-height:calc(1.25em + 10px); font-size:11pt; background:#fff; }
+  /* every entered value is the same size, whether or not it sits in a .field box
+     (the stack lists, health rows and career blocks are outside one) */
+  .val { font-size:11pt; text-align:center; }   /* entered info centered in its box */
   .stack .val { text-align:left; }            /* except the multi-line lists, which read better left */
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
 
   .band { text-align:center; color:var(--band-c); font-weight:800;
-    text-transform:uppercase; letter-spacing:.05em; font-size:14px;
-    margin:12px 0 3px; font-family:var(--label-font); }
+    text-transform:uppercase; letter-spacing:.05em; font-size:12pt;
+    margin:6px 0 2px; font-family:var(--label-font); }
   .band-sub { text-align:center; color:var(--muted); font-size:9px;
-    text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; font-family:var(--label-font); }
+    text-transform:uppercase; letter-spacing:.06em; margin-bottom:3px; font-family:var(--label-font); }
 
-  .chk-line { font-size:11.5px; line-height:1.8; }
+  .chk-line { font-size:11.5px; line-height:1.45; }
   .chk { color:var(--chk-on); font-weight:700; }
   .chk-off { color:#bbb; }
 
-  .stack .val { margin-bottom:6px; }
-  .career { font-size:12.5px; color:var(--ink); margin-top:1px; }
+  .stack .val { margin-bottom:2px; }
+  .career { font-size:11pt; font-weight:400; color:var(--ink); margin-top:1px; }
+  /* dog names print bold; the dates/certs beside them stay regular */
+  .dogname { font-weight:700; }
+  .sheet-dog .sheet-head .kn { font-weight:700; }
 
   /* Dog page */
   .photos { display:grid; grid-template-columns:1fr 1.35fr; gap:12px; margin:10px 0; }
@@ -104,10 +113,10 @@
     background:var(--frame-bg); display:flex; align-items:center; justify-content:center;
     height:2.7in; }
   .photos .frame img { width:100%; height:100%; object-fit:cover; }
-  .ped-health { display:grid; grid-template-columns:1.55fr 1fr; gap:12px; }
 
   /* 3-generation pedigree drawn as a bracket tree with connector lines */
-  .ped-tree { display:flex; height:2.55in; font-size:8.6px; align-items:stretch; }
+  /* full-width tree: wide boxes keep names on one line, so it needs far less height */
+  .ped-tree { display:flex; height:1.6in; font-size:8.6px; align-items:stretch; }
   .ped-tree .pcol { display:flex; flex-direction:column; justify-content:space-around; }
   .ped-tree .subject { flex:1.02; } .ped-tree .parents { flex:1.1; } .ped-tree .grands { flex:1.15; }
   .ped-tree .pcell { flex:1; display:flex; align-items:center; position:relative; padding:2px 0; }
@@ -125,8 +134,6 @@
     height:1px; background:var(--ped-line); }                /* bus -> parent node */
   .ped-tree .pgroup > .pcell::before { content:""; position:absolute; left:-9px; top:50%;
     width:9px; height:1px; background:var(--ped-line); }     /* box -> bus */
-  .health-tbl .val { display:flex; justify-content:space-between; gap:8px; }
-  .health-tbl .hk { color:var(--muted); font-size:10px; text-transform:uppercase; font-family:var(--label-font); }
   .foot { position:absolute; bottom:0.3in; left:0; right:0; text-align:center;
     font-size:8px; color:var(--foot-c); letter-spacing:.12em; }
 </style>
@@ -151,8 +158,8 @@
       <div class="yrs">100</div>
       <div class="anniv">YEARS</div>
     </div>
-    <h1>Breeder Showcase</h1>
-    <div class="tag">English Springer Spaniel Field Trial Association</div>
+    <h1>Breeders&rsquo; Showcase</h1>
+    <div class="tag">ESSFTA Foundation</div>
     <div class="years">1926 &ndash; 2026 &middot; 100th Anniversary</div>
     <div class="theme">&ldquo;Paw-cific Northwest!&rdquo;</div>
     <div class="years">{{ SHOW_YEAR }} National Specialty &middot; October 10&ndash;17, {{ SHOW_YEAR }}<br>Linn County Expo Center &middot; Albany, Oregon</div>

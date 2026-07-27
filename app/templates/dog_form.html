@@ -4,6 +4,11 @@
   <a href="/kennel/{{ k.id }}" class="hint" style="text-decoration:none">&larr; Back to {{ k.kennel_name or "kennel" }}</a>
   <h2 style="margin-top:8px">Dog page</h2>
   <p class="hint">This becomes one page in the booklet.</p>
+  {% if entries_locked() %}
+  <p class="hint" style="background:#fbf3d6;border:1px solid #d9c98a;border-radius:6px;padding:10px 12px;color:#6b5a1e">
+    <strong>Entries closed {{ deadline_text() }}.</strong> This dog page is now read-only.
+  </p>
+  {% endif %}
 
   <form method="post" action="/dog/{{ d.id }}">
     <label>Dog's registered name with titles</label>
@@ -81,9 +86,11 @@
     <label>Has produced</label>
     <textarea name="has_produced">{{ d.has_produced }}</textarea>
 
+    {% if not entries_locked() %}
     <div class="actions">
       <button class="btn" type="submit">Save dog</button>
     </div>
+    {% endif %}
   </form>
 </div>
 
@@ -97,28 +104,34 @@
         <div class="meta" style="margin-bottom:8px">Photo {{ slot }}{{ " (portrait/headshot)" if slot == 1 else " (action/stack)" }}</div>
         {% if path %}
           <img src="/photo/{{ path }}" alt="Photo {{ slot }}">
+          {% if not entries_locked() %}
           <form method="post" action="/dog/{{ d.id }}/photo/{{ slot }}/delete" style="margin-top:8px">
             <button class="btn small danger" type="submit">Remove</button>
           </form>
+          {% endif %}
         {% else %}
           <p class="meta">No photo yet.</p>
         {% endif %}
+        {% if not entries_locked() %}
         <form method="post" action="/dog/{{ d.id }}/photo/{{ slot }}"
               enctype="multipart/form-data" class="photo-upload" style="margin-top:10px">
           <input type="file" name="photo" accept="image/*" required>
           <button class="btn small gold" type="submit" style="margin-top:8px">Upload</button>
         </form>
+        {% endif %}
       </div>
     {% endfor %}
   </div>
 </div>
 
+{% if not entries_locked() %}
 <div class="card">
   <form method="post" action="/dog/{{ d.id }}/delete"
         onsubmit="return confirm('Delete this dog page?')">
     <button class="btn danger small" type="submit">Delete this dog</button>
   </form>
 </div>
+{% endif %}
 
 <script>
 // Client-side downscale: shrink large images to <=2000px before upload so

@@ -1,10 +1,11 @@
 """
-ESSFTA Breeder Showcase — configuration, brand palette, and field definitions.
+ESSFTA Foundation Breeders' Showcase — configuration, brand palette, and field definitions.
 
 The field definitions here are the single source of truth for both the intake
 forms and the assembled booklet, so the two can never drift out of sync.
 """
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 
 # --- Paths -------------------------------------------------------------------
@@ -30,11 +31,26 @@ ADMIN_EMAILS = {
     if e.strip()
 }
 
+# --- Entry deadline ----------------------------------------------------------
+# Breeders may not create or change an entry after this instant; they can still
+# sign in and read what they submitted. Admins are never locked out, so they can
+# still fix a typo or enter someone on request.
+#
+# Default = end of day 16 September 2026, Pacific time. Pacific (rather than the
+# server's UTC) so that nobody in the continental US is cut off early, and the
+# National itself is in Albany, Oregon. Override with an ISO-8601 datetime in
+# SHOWCASE_ENTRY_DEADLINE, e.g. "2026-09-16T23:59:59-05:00".
+ENTRY_DEADLINE = datetime.fromisoformat(
+    os.environ.get("SHOWCASE_ENTRY_DEADLINE", "2026-09-16T23:59:59-07:00")
+)
+if ENTRY_DEADLINE.tzinfo is None:  # a naive override would break the comparison
+    ENTRY_DEADLINE = ENTRY_DEADLINE.replace(tzinfo=timezone.utc)
+
 # --- Mailgun (magic-link delivery) ------------------------------------------
 MAILGUN_DOMAIN = os.environ.get("MAILGUN_DOMAIN", "mg.collver.biz")
 MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY", "")
 MAIL_FROM = os.environ.get(
-    "SHOWCASE_MAIL_FROM", "ESSFTA Breeder Showcase <showcase@mg.collver.biz>"
+    "SHOWCASE_MAIL_FROM", "ESSFTA Foundation Breeders Showcase <showcase@mg.collver.biz>"
 )
 
 # --- Brand palette (ESSFTA 100th Anniversary 1926–2026) ----------------------
@@ -77,6 +93,7 @@ DOG_HEALTH_FIELDS = [
     ("eyes", "Eyes #"),
     ("pra", "PRA"),
     ("cardiac", "Cardiac #"),
+    ("chic", "CHIC #"),
 ]
 
 # --- Dog page: 3-generation pedigree slots -----------------------------------
