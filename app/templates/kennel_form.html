@@ -91,7 +91,7 @@
     {% endfor %}
 
     <div class="section-title">At Stud</div>
-    <div class="section-sub">Registered name with titles · date of birth · health clearances/certification numbers (up to {{ MAX_AT_STUD }})</div>
+    <div class="section-sub">Registered name with titles (Call Name) · date of birth · health clearances · certification numbers (up to {{ MAX_AT_STUD }})</div>
     {% for i in range(MAX_AT_STUD) %}
       {% set st = k.at_stud_json[i] if k.at_stud_json|length > i else {} %}
       <div class="repeat-row">
@@ -104,7 +104,7 @@
     {% endfor %}
 
     <div class="section-title">Planned Breedings</div>
-    <div class="section-sub">Sire &amp; dam registered name with titles · estimated date of whelp (up to {{ MAX_PLANNED }})</div>
+    <div class="section-sub">Sire &amp; dam registered name with titles (Call Name) · estimated date of whelp (up to {{ MAX_PLANNED }})</div>
     {% for i in range(MAX_PLANNED) %}
       {% set pb = k.planned_json[i] if k.planned_json|length > i else {} %}
       <div class="repeat-row">

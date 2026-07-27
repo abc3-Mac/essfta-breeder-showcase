@@ -46,7 +46,7 @@
 
   {% if k.our_dogs_json %}
   <div class="band">Our Dogs</div>
-  <div class="band-sub">Registered name with titles &middot; career highlights</div>
+  <div class="band-sub">Registered name with titles (Call Name) &middot; career highlights</div>
   <div class="stack">
     {% for od in k.our_dogs_json %}
       <div class="val"><span class="dogname">{{ od.name }}</span>{% if od.highlights %}<div class="career">{{ od.highlights }}</div>{% endif %}</div>
@@ -56,7 +56,7 @@
 
   {% if k.at_stud_json %}
   <div class="band">At Stud</div>
-  <div class="band-sub">Registered name with titles &middot; date of birth &middot; certification numbers</div>
+  <div class="band-sub">Registered name with titles (Call Name) &middot; date of birth &middot; certification numbers</div>
   <div class="stack">
     {% for st in k.at_stud_json %}
       <div class="val"><span class="dogname">{{ st.name }}</span>{% if st.dob %} &mdash; {{ st.dob }}{% endif %}{% if st.certs %}<div class="career">{{ st.certs }}</div>{% endif %}</div>
@@ -66,7 +66,7 @@
 
   {% if k.planned_json %}
   <div class="band">Planned Breedings</div>
-  <div class="band-sub">Sire &amp; dam registered name with titles &middot; estimated date of whelp</div>
+  <div class="band-sub">Sire &amp; dam registered name with titles (Call Name)</div>
   <div class="stack">
     {% for pb in k.planned_json %}
       <div class="val"><span class="dogname">{{ pb.sire_dam }}</span>{% if pb.whelp %} &mdash; {{ pb.whelp }}{% endif %}</div>
@@ -74,5 +74,5 @@
   </div>
   {% endif %}
 
-  <div class="foot">ESSFTA FOUNDATION BREEDERS&rsquo; SHOWCASE &middot; 100 YEARS &middot; 1926&ndash;2026</div>
+  <div class="foot">ESSFTA FOUNDATION BREEDERS&rsquo; SHOWCASE &middot; 100 YEARS &middot; 2026</div>
 </div>
