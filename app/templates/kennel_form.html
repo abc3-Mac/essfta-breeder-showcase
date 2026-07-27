@@ -80,11 +80,11 @@
     </div>
 
     <div class="section-title">Our Dogs</div>
-    <div class="section-sub">Registered name with titles · career highlights (up to {{ MAX_OUR_DOGS }})</div>
+    <div class="section-sub">Registered name with titles (Call Name) · career highlights (up to {{ MAX_OUR_DOGS }})</div>
     {% for i in range(MAX_OUR_DOGS) %}
       {% set od = k.our_dogs_json[i] if k.our_dogs_json|length > i else {} %}
       <div class="repeat-row">
-        <input type="text" name="ourdog_name_{{ i }}" placeholder="Registered name with titles"
+        <input type="text" name="ourdog_name_{{ i }}" placeholder="Registered name with titles (Call Name)"
                value="{{ od.get('name','') }}" style="margin-bottom:6px">
         <textarea name="ourdog_hl_{{ i }}" placeholder="Career highlights">{{ od.get('highlights','') }}</textarea>
       </div>
