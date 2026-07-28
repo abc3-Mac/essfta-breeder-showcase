@@ -57,10 +57,8 @@
     {% endfor %}
   </div>
 
-  <div class="band">Show / Performance Career Highlights</div>
-  <div class="val">{{ d.career_highlights }}</div>
-  <div class="band">Best Virtues</div>
-  <div class="val">{{ d.best_virtues }}</div>
+  {% if d.career_highlights %}<div class="band">Show / Performance Career Highlights</div><div class="val">{{ d.career_highlights }}</div>{% endif %}
+  {% if d.best_virtues %}<div class="band">Best Virtues</div><div class="val">{{ d.best_virtues }}</div>{% endif %}
   {% if d.wish_list %}<div class="band">Wish List of Virtues</div><div class="val">{{ d.wish_list }}</div>{% endif %}
   {% if d.has_produced %}<div class="band">Has Produced</div><div class="val">{{ d.has_produced }}</div>{% endif %}
 
