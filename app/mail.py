@@ -83,12 +83,12 @@ def send_entry_copy(kennel: dict, dogs: list, pdf_path: str) -> bool:
         f"booklet:\nKennel: {kname}\nDogs: {dog_names}\n\n"
         f"Please review it. If anything needs changing, sign back in at "
         f"{config.BASE_URL} and edit your entry, then mark it complete again to "
-        f"get an updated copy.\n\nESSFTA — 100 Years — 1926–2026"
+        f"get an updated copy.\n\nESSFTA Foundation Breeders' Showcase — 2026"
     )
     html = f"""\
 <div style="font-family:Georgia,serif;max-width:540px;margin:auto;color:#26251f;line-height:1.5">
   <div style="background:#0d3b23;color:#f6f1e2;padding:18px;text-align:center;border-radius:8px 8px 0 0">
-    <div style="border:2px solid #c8a53a;color:#c8a53a;border-radius:999px;display:inline-block;padding:3px 12px;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:.1em">100 YEARS &middot; 1926&ndash;2026</div>
+    <div style="border:2px solid #c8a53a;color:#c8a53a;border-radius:999px;display:inline-block;padding:3px 12px;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:.1em">2026</div>
     <h2 style="margin:10px 0 0">Thank you!</h2>
   </div>
   <div style="border:1px solid #d8d2bf;border-top:none;padding:22px;border-radius:0 0 8px 8px">
@@ -169,7 +169,7 @@ def send_invite(to: str, link: str, inviter: str = "ESSFTA") -> bool:
     html = f"""\
 <div style="font-family:Georgia,serif;max-width:540px;margin:auto;color:#26251f">
   <div style="background:#0d3b23;color:#f6f1e2;padding:20px;text-align:center;border-radius:8px 8px 0 0">
-    <div style="border:2px solid #c8a53a;color:#c8a53a;border-radius:999px;display:inline-block;padding:4px 14px;font-family:Helvetica,Arial,sans-serif;font-size:12px;letter-spacing:.1em">100 YEARS &middot; 1926&ndash;2026</div>
+    <div style="border:2px solid #c8a53a;color:#c8a53a;border-radius:999px;display:inline-block;padding:4px 14px;font-family:Helvetica,Arial,sans-serif;font-size:12px;letter-spacing:.1em">2026</div>
     <h2 style="margin:12px 0 0">ESSFTA Foundation Breeders&rsquo; Showcase</h2>
     <div style="color:#c8a53a;font-style:italic">&ldquo;Paw-cific Northwest!&rdquo;</div>
   </div>
@@ -219,7 +219,7 @@ def send_magic_link(to: str, link: str) -> bool:
   <p style="font-size:13px;color:#666">This link works for
      {config.MAGIC_LINK_TTL_MIN} minutes and can be used once.
      If you didn't request it, ignore this email.</p>
-  <p style="font-size:12px;color:#999">ESSFTA · 100 Years · 1926&ndash;2026</p>
+  <p style="font-size:12px;color:#999">ESSFTA Foundation Breeders&rsquo; Showcase &middot; 2026</p>
 </div>"""
 
     if not config.MAILGUN_API_KEY:
