@@ -13,7 +13,7 @@ services:
       # the app runs fine and logs links to the container log in the meantime.
       MAILGUN_DOMAIN: "${MAILGUN_DOMAIN:-mg.collver.biz}"
       MAILGUN_API_KEY: "${MAILGUN_API_KEY:-}"
-      SHOWCASE_MAIL_FROM: "${SHOWCASE_MAIL_FROM:-ESSFTA Breeder Showcase <showcase@mg.collver.biz>}"
+      SHOWCASE_MAIL_FROM: "${SHOWCASE_MAIL_FROM:-ESSFTA Foundation Breeders Showcase <showcase@collver.biz>}"
     volumes:
       - showcase_data:/data
       - showcase_uploads:/uploads

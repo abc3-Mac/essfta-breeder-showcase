@@ -50,7 +50,7 @@ if ENTRY_DEADLINE.tzinfo is None:  # a naive override would break the comparison
 MAILGUN_DOMAIN = os.environ.get("MAILGUN_DOMAIN", "mg.collver.biz")
 MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY", "")
 MAIL_FROM = os.environ.get(
-    "SHOWCASE_MAIL_FROM", "ESSFTA Foundation Breeders Showcase <showcase@mg.collver.biz>"
+    "SHOWCASE_MAIL_FROM", "ESSFTA Foundation Breeders Showcase <showcase@collver.biz>"
 )
 
 # --- Brand palette (ESSFTA 100th Anniversary 1926–2026) ----------------------
