@@ -36,12 +36,13 @@ ADMIN_EMAILS = {
 # sign in and read what they submitted. Admins are never locked out, so they can
 # still fix a typo or enter someone on request.
 #
-# Default = end of day 16 September 2026, Pacific time. Pacific (rather than the
-# server's UTC) so that nobody in the continental US is cut off early, and the
-# National itself is in Albany, Oregon. Override with an ISO-8601 datetime in
-# SHOWCASE_ENTRY_DEADLINE, e.g. "2026-09-16T23:59:59-05:00".
+# Default = end of day 30 September 2026, Pacific time (extended 2 weeks from the
+# original 16 September deadline). Pacific (rather than the server's UTC) so that
+# nobody in the continental US is cut off early, and the National itself is in
+# Albany, Oregon. Override with an ISO-8601 datetime in SHOWCASE_ENTRY_DEADLINE,
+# e.g. "2026-09-30T23:59:59-05:00".
 ENTRY_DEADLINE = datetime.fromisoformat(
-    os.environ.get("SHOWCASE_ENTRY_DEADLINE", "2026-09-16T23:59:59-07:00")
+    os.environ.get("SHOWCASE_ENTRY_DEADLINE", "2026-09-30T23:59:59-07:00")
 )
 if ENTRY_DEADLINE.tzinfo is None:  # a naive override would break the comparison
     ENTRY_DEADLINE = ENTRY_DEADLINE.replace(tzinfo=timezone.utc)
