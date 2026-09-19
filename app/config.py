@@ -20,7 +20,12 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 SECRET_KEY = os.environ.get("SHOWCASE_SECRET_KEY", "dev-insecure-change-me")
 BASE_URL = os.environ.get("SHOWCASE_BASE_URL", "http://localhost:8790")
 SHOW_YEAR = int(os.environ.get("SHOWCASE_YEAR", "2026"))
-MAGIC_LINK_TTL_MIN = 60  # magic links valid for 60 minutes
+# Breeders open these emails hours or days later, and a lapsed sign-in once
+# silently threw away a breeder's kennel-page edits. Err generous: the link is
+# still single-use, and the data is low-stakes.
+MAGIC_LINK_TTL_MIN = 60 * 24 * 3
+MAGIC_LINK_TTL_TEXT = "3 days"
+SESSION_MAX_AGE = 60 * 60 * 24 * 30  # stay signed in for 30 days
 
 # Admins (comma-separated emails) who can edit any kennel + assemble the book.
 ADMIN_EMAILS = {

@@ -108,6 +108,18 @@ CREATE TABLE IF NOT EXISTS magic_links (
     expires_at   TEXT NOT NULL,
     used_at      TEXT
 );
+
+-- The row as it stood just BEFORE each save, so any edit can be undone.
+-- No foreign key: history should outlive a deleted kennel or dog.
+CREATE TABLE IF NOT EXISTS revisions (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    entity       TEXT NOT NULL,                 -- 'kennel' | 'dog'
+    entity_id    INTEGER NOT NULL,
+    snapshot     TEXT NOT NULL,                 -- JSON of the full prior row
+    edited_by    TEXT,
+    created_at   TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_revisions_entity ON revisions(entity, entity_id);
 """
 
 # JSON columns and how they decode by default (list vs dict).
@@ -190,7 +202,44 @@ def list_all_kennels(order_by_name: bool = True) -> list:
     return [kennel_from_row(r) for r in rows]
 
 
-def update_kennel(kennel_id: int, fields: dict):
+def _snapshot(conn, entity: str, table: str, row_id: int, edited_by: str = None):
+    row = conn.execute(f"SELECT * FROM {table} WHERE id=?", (row_id,)).fetchone()
+    if row is None:
+        return
+    conn.execute(
+        "INSERT INTO revisions (entity, entity_id, snapshot, edited_by, created_at) "
+        "VALUES (?,?,?,?,?)",
+        (entity, row_id, json.dumps(dict(row)), edited_by, _now()),
+    )
+
+
+def list_revisions(entity: str, entity_id: int) -> list:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT id, edited_by, created_at, snapshot FROM revisions "
+            "WHERE entity=? AND entity_id=? ORDER BY id DESC",
+            (entity, entity_id),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def restore_revision(revision_id: int, edited_by: str = None):
+    """Put a kennel or dog back the way it was in one saved revision. The
+    current state is itself snapshotted first, so a restore can be undone."""
+    with get_conn() as conn:
+        rev = conn.execute("SELECT * FROM revisions WHERE id=?", (revision_id,)).fetchone()
+    if rev is None:
+        raise ValueError(f"revision {revision_id} not found")
+    snap = json.loads(rev["snapshot"])
+    for col in ("id", "kennel_id", "edit_token", "login_email", "created_at", "updated_at"):
+        snap.pop(col, None)
+    if rev["entity"] == "kennel":
+        update_kennel(rev["entity_id"], snap, edited_by=edited_by)
+    else:
+        update_dog(rev["entity_id"], snap, edited_by=edited_by)
+
+
+def update_kennel(kennel_id: int, fields: dict, edited_by: str = None):
     if not fields:
         return
     # JSON-encode any structured fields passed as python objects.
@@ -203,6 +252,7 @@ def update_kennel(kennel_id: int, fields: dict):
     encoded["updated_at"] = _now()
     cols = ", ".join(f"{k}=?" for k in encoded)
     with get_conn() as conn:
+        _snapshot(conn, "kennel", "kennels", kennel_id, edited_by)
         conn.execute(
             f"UPDATE kennels SET {cols} WHERE id=?",
             (*encoded.values(), kennel_id),
@@ -253,7 +303,7 @@ def create_dog(kennel_id: int) -> dict:
     return get_dog(did)  # read after commit so it's visible
 
 
-def update_dog(dog_id: int, fields: dict):
+def update_dog(dog_id: int, fields: dict, edited_by: str = None):
     if not fields:
         return
     encoded = {}
@@ -265,6 +315,7 @@ def update_dog(dog_id: int, fields: dict):
     encoded["updated_at"] = _now()
     cols = ", ".join(f"{k}=?" for k in encoded)
     with get_conn() as conn:
+        _snapshot(conn, "dog", "dogs", dog_id, edited_by)
         conn.execute(
             f"UPDATE dogs SET {cols} WHERE id=?", (*encoded.values(), dog_id)
         )

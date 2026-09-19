@@ -163,7 +163,7 @@ def send_invite(to: str, link: str, inviter: str = "ESSFTA") -> bool:
         f"Click to get started (no password needed):\n{link}\n\n"
         f"You'll fill in your kennel information and up to 3 dogs, with 2 photos "
         f"each. You can save and come back anytime.\n\n"
-        f"This link is good for {config.MAGIC_LINK_TTL_MIN} minutes; you can "
+        f"This link is good for {config.MAGIC_LINK_TTL_TEXT}; you can "
         f"request a fresh one at any time from the sign-in page."
     )
     html = f"""\
@@ -184,8 +184,7 @@ def send_invite(to: str, link: str, inviter: str = "ESSFTA") -> bool:
          border-radius:6px;text-decoration:none;font-family:Helvetica,Arial,sans-serif;
          font-weight:bold">Start my kennel entry</a>
     </p>
-    <p style="font-size:13px;color:#666">Link valid for {config.MAGIC_LINK_TTL_MIN}
-       minutes. Need a new one? Request it anytime from the sign-in page.</p>
+    <p style="font-size:13px;color:#666">Link valid for {config.MAGIC_LINK_TTL_TEXT}. Need a new one? Request it anytime from the sign-in page.</p>
   </div>
 </div>"""
     if not config.MAILGUN_API_KEY:
@@ -204,7 +203,7 @@ def send_magic_link(to: str, link: str) -> bool:
     text = (
         f"Click to sign in to the ESSFTA Foundation {config.SHOW_YEAR} Breeders' Showcase:\n\n"
         f"{link}\n\n"
-        f"This link is good for {config.MAGIC_LINK_TTL_MIN} minutes and can be "
+        f"This link is good for {config.MAGIC_LINK_TTL_TEXT} and can be "
         f"used once. If you didn't request it, you can ignore this email."
     )
     html = f"""\
@@ -217,7 +216,7 @@ def send_magic_link(to: str, link: str) -> bool:
        Sign in to the Showcase</a>
   </p>
   <p style="font-size:13px;color:#666">This link works for
-     {config.MAGIC_LINK_TTL_MIN} minutes and can be used once.
+     {config.MAGIC_LINK_TTL_TEXT} and can be used once.
      If you didn't request it, ignore this email.</p>
   <p style="font-size:12px;color:#999">ESSFTA Foundation Breeders&rsquo; Showcase &middot; 2026</p>
 </div>"""

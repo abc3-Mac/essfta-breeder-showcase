@@ -5,10 +5,17 @@
   <p class="hint">Enter your email and we'll send you a secure sign-in link — no password to remember.</p>
 
   {% if error %}<div class="flash err">{{ error }}</div>{% endif %}
+  {% if expired %}
+    <div class="flash err">
+      Your sign-in has expired, so your last change couldn't be saved yet.
+      Enter your email below for a fresh link. Anything you typed is kept in this
+      browser and will come back when you open your entry again.
+    </div>
+  {% endif %}
 
   {% if sent %}
     <div class="flash">
-      Check <strong>{{ email }}</strong> for your sign-in link. It's good for 60 minutes.
+      Check <strong>{{ email }}</strong> for your sign-in link. It's good for {{ LINK_TTL_TEXT }}.
     </div>
     <p class="hint">Didn't get it? Check spam, or <a href="/">try again</a>.</p>
   {% else %}

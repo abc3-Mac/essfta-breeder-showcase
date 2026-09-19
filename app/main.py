@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("showcase")
 
 app = FastAPI(title="ESSFTA Foundation Breeders' Showcase")
-app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY, max_age=60 * 60 * 12)
+app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY, max_age=config.SESSION_MAX_AGE)
 
 BASE = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE / "templates"))
@@ -43,12 +43,24 @@ templates.env.globals.update(
     MAX_OUR_DOGS=config.MAX_OUR_DOGS,
     MAX_AT_STUD=config.MAX_AT_STUD,
     MAX_PLANNED=config.MAX_PLANNED_BREEDINGS,
+    LINK_TTL_TEXT=config.MAGIC_LINK_TTL_TEXT,
 )
 # Callables, so the templates re-evaluate the deadline on every render.
 templates.env.globals.update(
     entries_locked=lambda: entries_locked(),
     deadline_text=lambda: deadline_text(),
 )
+
+
+class SignInRequired(Exception):
+    """Raised when a lapsed or missing sign-in hits a page that needs one."""
+
+
+@app.exception_handler(SignInRequired)
+def _sign_in_required(request: Request, exc: SignInRequired):
+    # 303 so a failed form POST lands on the sign-in page as a GET, instead of
+    # the bare "Forbidden" that once made a breeder think her entry was locked.
+    return RedirectResponse("/?expired=1", status_code=303)
 
 
 @app.on_event("startup")
@@ -64,7 +76,7 @@ def current_user(request: Request):
 def require_user(request: Request):
     u = current_user(request)
     if not u:
-        raise HTTPException(status_code=401, detail="Please sign in.")
+        raise SignInRequired()
     return u
 
 
@@ -88,6 +100,8 @@ def _kennel_or_404(kennel_id: int) -> dict:
 
 
 def _guard_kennel(request: Request, kennel_id: int) -> dict:
+    if not current_user(request):
+        raise SignInRequired()
     k = _kennel_or_404(kennel_id)
     if not can_edit_kennel(request, k):
         raise HTTPException(403, "You don't have access to this kennel entry.")
@@ -121,10 +135,12 @@ def _require_open(request: Request) -> None:
 
 # --- Auth --------------------------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request):
+def home(request: Request, expired: int = 0):
     if current_user(request):
         return RedirectResponse("/dashboard", status_code=302)
-    return templates.TemplateResponse("login.html", {"request": request, "sent": False})
+    return templates.TemplateResponse(
+        "login.html", {"request": request, "sent": False, "expired": bool(expired)}
+    )
 
 
 @app.post("/login", response_class=HTMLResponse)
@@ -240,7 +256,7 @@ async def kennel_save(request: Request, kennel_id: int):
             if form.get(f"planned_sd_{i}", "").strip()
         ],
     }
-    db.update_kennel(kennel_id, fields)
+    db.update_kennel(kennel_id, fields, edited_by=current_user(request)["email"])
     if form.get("_action") == "submit":
         db.update_kennel(kennel_id, {"status": "submitted"})
         k = db.get_kennel(kennel_id)
@@ -257,7 +273,7 @@ async def kennel_save(request: Request, kennel_id: int):
             mail.send_entry_copy(k, dogs, pdf)
         except Exception:  # noqa: BLE001
             log.exception("entry-copy email failed")
-    return RedirectResponse(f"/kennel/{kennel_id}", status_code=302)
+    return RedirectResponse(f"/kennel/{kennel_id}?saved=1", status_code=302)
 
 
 @app.post("/kennel/{kennel_id}/delete")
@@ -326,8 +342,8 @@ async def dog_save(request: Request, dog_id: int):
             key: form.get(f"health_{key}", "").strip() for key, _ in config.DOG_HEALTH_FIELDS
         },
     }
-    db.update_dog(dog_id, fields)
-    return RedirectResponse(f"/dog/{dog_id}", status_code=302)
+    db.update_dog(dog_id, fields, edited_by=current_user(request)["email"])
+    return RedirectResponse(f"/dog/{dog_id}?saved=1", status_code=302)
 
 
 @app.post("/dog/{dog_id}/photo/{slot}")
