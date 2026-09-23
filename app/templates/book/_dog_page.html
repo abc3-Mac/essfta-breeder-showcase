@@ -16,9 +16,12 @@
 
   {% set p1 = d.photo1_uri if embed else ("/photo/" ~ d.photo1_path if d.photo1_path else "") %}
   {% set p2 = d.photo2_uri if embed else ("/photo/" ~ d.photo2_path if d.photo2_path else "") %}
-  <div class="photos">
-    <div class="frame">{% if p1 %}<img src="{{ p1 }}" alt="">{% endif %}</div>
-    <div class="frame">{% if p2 %}<img src="{{ p2 }}" alt="">{% endif %}</div>
+  {# Only one photo (e.g. no headshot): drop the empty frame and centre the
+     one we have at its usual size, so the rest of the page doesn't move. #}
+  {% set single = (p1 and not p2) or (p2 and not p1) %}
+  <div class="photos{% if single %} single{% endif %}">
+    {% if p1 or not single %}<div class="frame">{% if p1 %}<img src="{{ p1 }}" alt="">{% endif %}</div>{% endif %}
+    {% if p2 or not single %}<div class="frame">{% if p2 %}<img src="{{ p2 }}" alt="">{% endif %}</div>{% endif %}
   </div>
 
   <div class="grid3">

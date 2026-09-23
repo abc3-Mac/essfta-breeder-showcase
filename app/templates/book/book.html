@@ -113,6 +113,7 @@
     background:var(--frame-bg); display:flex; align-items:center; justify-content:center;
     height:2.7in; }
   .photos .frame img { width:100%; height:100%; object-fit:cover; }
+  .photos.single { grid-template-columns:calc((100% - 12px) * 1.35 / 2.35); justify-content:center; }
 
   /* 3-generation pedigree drawn as a bracket tree with connector lines */
   /* full-width tree: wide boxes keep names on one line, so it needs far less height */
