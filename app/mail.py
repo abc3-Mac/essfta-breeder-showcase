@@ -6,6 +6,7 @@ is still testable without email.
 """
 import logging
 import os
+import re
 import urllib.parse
 import urllib.request
 
@@ -65,11 +66,14 @@ def _send_via_mailgun_attach(to: str, subject: str, text: str, html: str,
 def send_entry_copy(kennel: dict, dogs: list, pdf_path: str) -> bool:
     """Email the breeder a copy of their own kennel + dog pages as a PDF."""
     # Recipients: the account they signed in with, plus their contact email.
+    # The contact box sometimes holds several addresses ("a@x.com & b@y.com"),
+    # which Mailgun rejects as one bad address; split it into each one.
     recips = []
-    for e in (kennel.get("login_email"), kennel.get("email")):
-        e = (e or "").strip()
-        if e and "@" in e and e.lower() not in [r.lower() for r in recips]:
-            recips.append(e)
+    for field in (kennel.get("login_email"), kennel.get("email")):
+        for e in re.split(r"\s+and\s+|[\s,;&/]+", field or "", flags=re.I):
+            e = e.strip().strip("<>()[].")
+            if e and "@" in e and e.lower() not in [r.lower() for r in recips]:
+                recips.append(e)
     if not recips:
         return False
     to = ", ".join(recips)
