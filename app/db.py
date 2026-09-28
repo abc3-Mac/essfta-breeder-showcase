@@ -342,18 +342,22 @@ def create_magic_link(email: str, ttl_min: int, kennel_id: int = None) -> str:
 
 
 def consume_magic_link(token: str) -> dict:
-    """Return {email, kennel_id} if valid+unused+unexpired, else None. Marks used."""
+    """Return {email, kennel_id} if valid+unexpired, else None.
+
+    Links are reusable until they expire: breeders re-click old emails or open
+    them in a different browser, and a one-time link told them "expired".
+    used_at records the FIRST use only."""
     now = datetime.now(timezone.utc)
     with get_conn() as conn:
         row = conn.execute(
             "SELECT * FROM magic_links WHERE token=?", (token,)
         ).fetchone()
-        if not row or row["used_at"]:
+        if not row:
             return None
         if datetime.fromisoformat(row["expires_at"]) < now:
             return None
         conn.execute(
-            "UPDATE magic_links SET used_at=? WHERE token=?",
+            "UPDATE magic_links SET used_at=? WHERE token=? AND used_at IS NULL",
             (now.isoformat(timespec="seconds"), token),
         )
         return {"email": row["email"], "kennel_id": row["kennel_id"]}

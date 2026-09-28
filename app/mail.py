@@ -203,8 +203,8 @@ def send_magic_link(to: str, link: str) -> bool:
     text = (
         f"Click to sign in to the ESSFTA Foundation {config.SHOW_YEAR} Breeders' Showcase:\n\n"
         f"{link}\n\n"
-        f"This link is good for {config.MAGIC_LINK_TTL_TEXT} and can be "
-        f"used once. If you didn't request it, you can ignore this email."
+        f"This link is good for {config.MAGIC_LINK_TTL_TEXT} — you can click it again "
+        f"any time in that window. If you didn't request it, you can ignore this email."
     )
     html = f"""\
 <div style="font-family:Georgia,serif;max-width:520px;margin:auto;color:#26251f">
@@ -216,7 +216,7 @@ def send_magic_link(to: str, link: str) -> bool:
        Sign in to the Showcase</a>
   </p>
   <p style="font-size:13px;color:#666">This link works for
-     {config.MAGIC_LINK_TTL_TEXT} and can be used once.
+     {config.MAGIC_LINK_TTL_TEXT}; you can click it again any time in that window.
      If you didn't request it, ignore this email.</p>
   <p style="font-size:12px;color:#999">ESSFTA Foundation Breeders&rsquo; Showcase &middot; 2026</p>
 </div>"""

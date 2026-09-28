@@ -16,6 +16,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, Resp
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.concurrency import run_in_threadpool
 
 from . import config, db, images, mail
 
@@ -161,7 +162,7 @@ def auth(request: Request, token: str):
         return templates.TemplateResponse(
             "login.html",
             {"request": request, "sent": False,
-             "error": "That sign-in link has expired or was already used. "
+             "error": "That sign-in link has expired. "
                       "Please request a new one."},
         )
     email = result["email"]
@@ -267,9 +268,11 @@ async def kennel_save(request: Request, kennel_id: int):
         except Exception:  # noqa: BLE001 — never let notification break the save
             log.exception("admin notice failed")
         # Email the breeder a PDF proof of their own pages.
+        # Sync Playwright refuses to run inside the asyncio loop, so render
+        # in a worker thread (this handler is async for the form parsing).
         try:
             from .book.render import assemble_kennel_pdf
-            pdf = assemble_kennel_pdf(kennel_id, style="anniversary")
+            pdf = await run_in_threadpool(assemble_kennel_pdf, kennel_id, style="anniversary")
             mail.send_entry_copy(k, dogs, pdf)
         except Exception:  # noqa: BLE001
             log.exception("entry-copy email failed")
