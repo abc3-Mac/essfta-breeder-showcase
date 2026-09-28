@@ -9,12 +9,17 @@ file, so Playwright needs neither an admin session nor network access.
 The on-screen HTML preview instead points at the live /photo/ route.
 """
 import base64
+import logging
+import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .. import config, db
+
+log = logging.getLogger("showcase.render")
 
 BASE = Path(__file__).resolve().parent.parent
 _env = Environment(
@@ -184,4 +189,27 @@ def assemble_kennel_pdf(kennel_id: int, style: str = "anniversary") -> str:
     safe = "".join(c for c in (k.get("kennel_name") or f"kennel{kennel_id}")
                    if c.isalnum() or c in " -_").strip().replace(" ", "_") or f"kennel{kennel_id}"
     pdf_path = config.DATA_DIR / "proofs" / f"{safe}_{config.SHOW_YEAR}.pdf"
-    return _render_pdf(html, pdf_path)
+    return _compress_pdf(_render_pdf(html, pdf_path))
+
+
+def _compress_pdf(pdf_path: str) -> str:
+    """Shrink an emailed proof with Ghostscript. Chromium embeds photos at
+    full size, so a 3-dog proof reached 22 MB, over the 25 MB mail limit once
+    base64-encoded; /ebook brings it to a few hundred KB. The print book is
+    never compressed. Falls back to the original if gs is missing or fails."""
+    gs = shutil.which("gs")
+    if not gs:
+        log.warning("ghostscript not installed; proof sent uncompressed")
+        return pdf_path
+    tmp = str(pdf_path) + ".gs.pdf"
+    try:
+        subprocess.run(
+            [gs, "-q", "-dNOPAUSE", "-dBATCH", "-dSAFER", "-sDEVICE=pdfwrite",
+             "-dCompatibilityLevel=1.6", "-dPDFSETTINGS=/ebook",
+             f"-sOutputFile={tmp}", str(pdf_path)],
+            check=True, timeout=120, capture_output=True)
+        Path(tmp).replace(pdf_path)
+    except Exception:  # noqa: BLE001
+        log.exception("proof compression failed; sending uncompressed")
+        Path(tmp).unlink(missing_ok=True)
+    return pdf_path

@@ -17,6 +17,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Chromium + its OS libraries (needed to render the booklet PDF)
 RUN playwright install --with-deps chromium
 
+# Ghostscript compresses the emailed per-kennel proof PDFs (render.py).
+RUN apt-get update && apt-get install -y --no-install-recommends ghostscript \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY app ./app
 
 # Persistent data lives on mounted volumes
