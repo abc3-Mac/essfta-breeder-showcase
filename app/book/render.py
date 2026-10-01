@@ -101,6 +101,20 @@ def cover_logo_uri() -> str:
     return _LOGO_CACHE
 
 
+_ANNIV_LOGO_CACHE = None
+
+
+def anniversary_logo_uri() -> str:
+    """ESSFTA 100th Anniversary logo (transparent PNG) as a data URI. An optional
+    ADDITION to the classic cover, beside the ESSF logo; off unless asked for."""
+    global _ANNIV_LOGO_CACHE
+    if _ANNIV_LOGO_CACHE is None:
+        p = BASE / "static" / "img" / "essfta-100th-anniversary-logo.png"
+        _ANNIV_LOGO_CACHE = ("data:image/png;base64," +
+                             base64.b64encode(p.read_bytes()).decode()) if p.exists() else ""
+    return _ANNIV_LOGO_CACHE
+
+
 STYLES = {"classic", "anniversary"}
 
 
@@ -108,11 +122,12 @@ def _norm_style(style: str) -> str:
     return style if style in STYLES else "anniversary"
 
 
-def build_book_context(request, style: str = "anniversary") -> dict:
+def build_book_context(request, style: str = "anniversary", anniv_logo: bool = False) -> dict:
     """Context for the on-screen (network-served) HTML preview."""
     return {"request": request, "kennels": _kennels_with_dogs(),
             "embed": False, "style": _norm_style(style),
-            "font_faces": font_face_css(), "logo_uri": cover_logo_uri()}
+            "font_faces": font_face_css(), "logo_uri": cover_logo_uri(),
+            "anniv_logo_uri": anniversary_logo_uri() if anniv_logo else ""}
 
 
 def _embed_photos(kennels: list):
@@ -122,13 +137,14 @@ def _embed_photos(kennels: list):
             d["photo2_uri"] = _photo_data_uri(d.get("photo2_path"))
 
 
-def render_book_html(embed: bool = True, style: str = "anniversary") -> str:
+def render_book_html(embed: bool = True, style: str = "anniversary", anniv_logo: bool = False) -> str:
     kennels = _kennels_with_dogs()
     if embed:
         _embed_photos(kennels)
     tmpl = _env.get_template("book/book.html")
     return tmpl.render(kennels=kennels, embed=embed, style=_norm_style(style),
                        font_faces=font_face_css(), logo_uri=cover_logo_uri(),
+                       anniv_logo_uri=anniversary_logo_uri() if anniv_logo else "",
                        request=None)
 
 
@@ -164,11 +180,12 @@ def _render_pdf(html: str, pdf_path) -> str:
     return str(pdf_path)
 
 
-def assemble_pdf(style: str = "anniversary") -> str:
+def assemble_pdf(style: str = "anniversary", anniv_logo: bool = False) -> str:
     """Render the full book to a PDF and return its path."""
     style = _norm_style(style)
-    html = render_book_html(embed=True, style=style)
-    pdf_path = config.DATA_DIR / "books" / f"ESSFTA_Foundation_Breeders_Showcase_{config.SHOW_YEAR}_{style}.pdf"
+    html = render_book_html(embed=True, style=style, anniv_logo=anniv_logo)
+    suffix = "_100th" if anniv_logo else ""
+    pdf_path = config.DATA_DIR / "books" / f"ESSFTA_Foundation_Breeders_Showcase_{config.SHOW_YEAR}_{style}{suffix}.pdf"
     return _render_pdf(html, pdf_path)
 
 

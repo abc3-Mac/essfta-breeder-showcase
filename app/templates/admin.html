@@ -21,8 +21,12 @@
       <p class="hint" style="margin:4px 0 10px">Green &amp; burgundy, serif — with the classic Breeders&rsquo; Showcase cover (logo + kennel list).</p>
       <div class="actions" style="margin:0">
         <a class="btn ghost small" href="/admin/book/preview?style=classic" target="_blank">Preview</a>
+        <a class="btn ghost small" href="/admin/book/preview?style=classic&amp;anniv=1" target="_blank">Preview with 100th logo</a>
         <form method="post" action="/admin/book/assemble">
           <input type="hidden" name="style" value="classic">
+          <label class="hint" style="display:inline-flex;align-items:center;gap:6px;margin:0 8px 0 0">
+            <input type="checkbox" name="anniv" value="1"> Add 100th Anniversary logo to cover
+          </label>
           <button class="btn small" type="submit">Assemble PDF</button>
         </form>
       </div>

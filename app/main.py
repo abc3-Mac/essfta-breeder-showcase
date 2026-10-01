@@ -440,23 +440,23 @@ def admin_invite(request: Request, owner_email: str = Form(...)):
 
 
 @app.get("/admin/book/preview", response_class=HTMLResponse)
-def book_preview(request: Request, style: str = "anniversary"):
+def book_preview(request: Request, style: str = "anniversary", anniv: int = 0):
     _require_admin(request)
     from .book.render import build_book_context
-    ctx = build_book_context(request, style=style)
+    ctx = build_book_context(request, style=style, anniv_logo=bool(anniv))
     return templates.TemplateResponse("book/book.html", ctx)
 
 
 @app.post("/admin/book/assemble")
-def book_assemble(request: Request, style: str = Form("anniversary")):
+def book_assemble(request: Request, style: str = Form("anniversary"), anniv: str = Form("")):
     _require_admin(request)
     from .book.render import assemble_pdf, _norm_style
     style = _norm_style(style)
-    pdf_path = assemble_pdf(style)
+    pdf_path = assemble_pdf(style, anniv_logo=bool(anniv))
     return FileResponse(
         pdf_path,
         media_type="application/pdf",
-        filename=f"ESSFTA_Foundation_Breeders_Showcase_{config.SHOW_YEAR}_{style}.pdf",
+        filename=Path(pdf_path).name,
     )
 
 
