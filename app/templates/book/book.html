@@ -61,10 +61,10 @@
   .cover-showcase { background:#f1ead9; color:#1e1e1e; display:block; padding:0; text-align:center; }
   .cover-showcase .cs-top { position:absolute; top:0; left:0; right:0; height:0.34in; background:#6b2022; }
   .cover-showcase .cs-logo { display:block; margin:1.3in auto 0; width:2.5in; height:auto; }
-  /* optional 100th Anniversary logo: below the kennel list, centred just above the
-     bottom burgundy band (an addition — the ESSF logo stays at the top) */
-  .cover-showcase .cs-anniv { position:absolute; left:0; right:0; bottom:1.3in;
-    margin:0 auto; display:block; height:2in; width:auto; }
+  /* cover option 2: the National Specialty logo below the kennel list, centred just
+     above the bottom burgundy band (an addition — the ESSF logo stays at the top) */
+  .cover-showcase .cs-extra { position:absolute; left:0; right:0; bottom:1.25in;
+    margin:0 auto; display:block; height:2.25in; width:auto; }
   .cover-showcase .cs-title { font-family:"ESSScript",cursive; font-size:52px; color:#1a1a1a;
     line-height:1.18; margin:0.4in 0.6in 0; }
   .cover-showcase .cs-kennels { font-family:"ESSSerif",Georgia,serif; font-size:19px;
@@ -155,7 +155,7 @@
     <div class="cs-kennels">
       {% for k in kennels %}{{ k.kennel_name|upper }}{% if not loop.last %} &nbsp;&#124;&nbsp; {% endif %}{% endfor %}
     </div>
-    {% if anniv_logo_uri %}<img class="cs-anniv" src="{{ anniv_logo_uri }}" alt="ESSFTA 100th Anniversary">{% endif %}
+    {% if extra_logo_uri %}<img class="cs-extra" src="{{ extra_logo_uri }}" alt="2026 ESSFTA National Specialty">{% endif %}
     <div class="cs-bottom">The English Springer Spaniel<br>Field Trial Association Foundation</div>
   </div>
   {% else %}

@@ -440,19 +440,19 @@ def admin_invite(request: Request, owner_email: str = Form(...)):
 
 
 @app.get("/admin/book/preview", response_class=HTMLResponse)
-def book_preview(request: Request, style: str = "anniversary", anniv: int = 0):
+def book_preview(request: Request, style: str = "anniversary", specialty: int = 0):
     _require_admin(request)
     from .book.render import build_book_context
-    ctx = build_book_context(request, style=style, anniv_logo=bool(anniv))
+    ctx = build_book_context(request, style=style, specialty_logo=bool(specialty))
     return templates.TemplateResponse("book/book.html", ctx)
 
 
 @app.post("/admin/book/assemble")
-def book_assemble(request: Request, style: str = Form("anniversary"), anniv: str = Form("")):
+def book_assemble(request: Request, style: str = Form("anniversary"), specialty: str = Form("")):
     _require_admin(request)
     from .book.render import assemble_pdf, _norm_style
     style = _norm_style(style)
-    pdf_path = assemble_pdf(style, anniv_logo=bool(anniv))
+    pdf_path = assemble_pdf(style, specialty_logo=bool(specialty))
     return FileResponse(
         pdf_path,
         media_type="application/pdf",
