@@ -67,7 +67,9 @@
     margin:0 auto; display:block; height:2.25in; width:auto; }
   .cover-showcase .cs-title { font-family:"ESSScript",cursive; font-size:52px; color:#1a1a1a;
     line-height:1.18; margin:0.4in 0.6in 0; }
-  .cover-showcase .cs-kennels { font-family:"ESSSerif",Georgia,serif; font-size:19px;
+  .cover-showcase .cs-k { display:inline-block; white-space:nowrap; }
+  .cover-showcase .cs-sep { padding:0 0.32em; }
+  .cover-showcase .cs-kennels { font-family:"ESSSerif",Georgia,serif; font-size:23px;
     letter-spacing:.04em; color:#2b2b2b; line-height:1.95; margin:0.5in 0.9in 0; }
   .cover-showcase .cs-bottom { position:absolute; bottom:0; left:0; right:0; background:#6b2022;
     color:#fff; font-family:"ESSSerif",Georgia,serif; font-weight:700; font-size:18px;
@@ -153,7 +155,7 @@
     {% if logo_uri %}<img class="cs-logo" src="{{ logo_uri }}" alt="ESSF">{% endif %}
     <div class="cs-title">{{ SHOW_YEAR }} National<br>Breeders&rsquo; Showcase</div>
     <div class="cs-kennels">
-      {% for k in kennels %}{{ k.kennel_name|upper }}{% if not loop.last %} &nbsp;&#124;&nbsp; {% endif %}{% endfor %}
+      {% for k in kennels %}<span class="cs-k">{{ k.kennel_name|short_kennel|upper }}{% if not loop.last %}<span class="cs-sep">&#124;</span>{% endif %}</span>{% endfor %}
     </div>
     {% if extra_logo_uri %}<img class="cs-extra" src="{{ extra_logo_uri }}" alt="2026 ESSFTA National Specialty">{% endif %}
     <div class="cs-bottom">The English Springer Spaniel<br>Field Trial Association Foundation</div>
@@ -176,11 +178,20 @@
   <div class="page blank"></div>
   {% endif %}
 
+  {# Print layout (full book only): every kennel starts on a RIGHT-hand (odd)
+     page; its dog pages follow, so a two-dog kennel's dogs face each other as a
+     spread. A blank LEFT page is inserted when the previous kennel ended on a
+     right-hand page. Page 1 = cover (right), 2 = blank, 3 = first kennel. #}
+  {% set pg = namespace(n=3) %}
   {% for k in kennels %}
+    {% if spreads and not proof and pg.n % 2 == 0 %}
+  <div class="page blank"></div>{% set pg.n = pg.n + 1 %}
+    {% endif %}
     {% include "book/_kennel_page.html" %}
     {% for d in k.dogs %}
       {% include "book/_dog_page.html" %}
     {% endfor %}
+    {% set pg.n = pg.n + 1 + (k.dogs|length) %}
   {% endfor %}
 
 <script>
@@ -209,10 +220,26 @@ function fitPages(){
     }
   });
 }
+// Cover kennel list: never start or end a line with a "|" separator. Each
+// name carries its trailing separator, so a line can only break after one;
+// once the lines are known, the break is fixed with a <br> and the separator
+// at the end of that line is removed (the <br> keeps the next name below).
+function trimSeps(){
+  var ks = Array.prototype.slice.call(document.querySelectorAll('.cs-k'));
+  var ends = [];
+  for (var i = 0; i < ks.length - 1; i++) {
+    if (ks[i + 1].offsetTop !== ks[i].offsetTop) ends.push(ks[i]);
+  }
+  ends.forEach(function(k){
+    var s = k.querySelector('.cs-sep'); if (s) s.style.display = 'none';
+    k.parentNode.insertBefore(document.createElement('br'), k.nextSibling);
+  });
+}
+function prep(){ trimSeps(); fitPages(); }
 if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(fitPages);
+  document.fonts.ready.then(prep);
 } else {
-  fitPages();
+  prep();
 }
 </script>
 </body>

@@ -26,6 +26,21 @@ _env = Environment(
     loader=FileSystemLoader(str(BASE / "templates")),
     autoescape=select_autoescape(["html"]),
 )
+import re as _re
+
+
+def short_kennel(name: str) -> str:
+    """Kennel name without its generic tail ("Kennel(s)", "English Springer
+    Spaniels", "Springers", "ESS"), for the cover and kennel-page headers:
+    "Topsail English Springer Spaniels" -> "Topsail"."""
+    s = (name or "").strip()
+    s = _re.sub(r"\s+(english\s+springer\s+spaniels?|english\s+springers?|springers?|kennels?|ess)\s*$",
+                "", s, flags=_re.I)
+    return s.strip() or (name or "").strip()
+
+
+_env.filters["short_kennel"] = short_kennel
+
 _env.globals.update(
     PALETTE=config.PALETTE,
     SHOW_YEAR=config.SHOW_YEAR,
@@ -128,7 +143,8 @@ def build_book_context(request, style: str = "anniversary", specialty_logo: bool
     return {"request": request, "kennels": _kennels_with_dogs(),
             "embed": False, "style": _norm_style(style),
             "font_faces": font_face_css(), "logo_uri": cover_logo_uri(),
-            "extra_logo_uri": specialty_logo_uri() if specialty_logo else ""}
+            "extra_logo_uri": specialty_logo_uri() if specialty_logo else "",
+            "spreads": True}
 
 
 def _embed_photos(kennels: list):
@@ -138,7 +154,8 @@ def _embed_photos(kennels: list):
             d["photo2_uri"] = _photo_data_uri(d.get("photo2_path"))
 
 
-def render_book_html(embed: bool = True, style: str = "anniversary", specialty_logo: bool = False) -> str:
+def render_book_html(embed: bool = True, style: str = "anniversary", specialty_logo: bool = False,
+                     spreads: bool = True) -> str:
     kennels = _kennels_with_dogs()
     if embed:
         _embed_photos(kennels)
@@ -146,7 +163,7 @@ def render_book_html(embed: bool = True, style: str = "anniversary", specialty_l
     return tmpl.render(kennels=kennels, embed=embed, style=_norm_style(style),
                        font_faces=font_face_css(), logo_uri=cover_logo_uri(),
                        extra_logo_uri=specialty_logo_uri() if specialty_logo else "",
-                       request=None)
+                       spreads=spreads, request=None)
 
 
 def _render_pdf(html: str, pdf_path) -> str:
